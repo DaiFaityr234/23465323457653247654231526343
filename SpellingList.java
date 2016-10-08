@@ -64,7 +64,7 @@ public class SpellingList {
 	File spelling_aid_failed;
 	File spelling_aid_statistics;
 	File spelling_aid_accuracy;
-
+	File check;
 
 	// ArrayLists for storing file contents for easier processing later according to levels
 	HashMap<Integer, ArrayList<String>> mapOfWords;
@@ -78,8 +78,13 @@ public class SpellingList {
 
 	// Constructor of spellinglist model for current session
 	public SpellingList(){
+		check = new File("wordList");
 		// Files that contains the word list and statistics
-		wordList = new File("NZCER-spelling-lists.txt");
+		if (!check.exists()){
+			wordList = new File("NZCER-spelling-lists.txt");
+		} else {
+			wordList = new File("wordList");
+		}
 		spelling_aid_tried_words = new File(".spelling_aid_tried_words");
 		spelling_aid_failed = new File(".spelling_aid_failed");
 		spelling_aid_statistics = new File(".spelling_aid_statistics");
@@ -225,7 +230,7 @@ public class SpellingList {
 					
 					spellingAidApp.changeToNextState();
 				} else if (spellType.equals("review")){
-					spellingAidApp.window.append(spellingAidApp.pColor,"\n You got "+ correctAnsCount +" out of "+ getNoOfQuestions() + " words correct.\n\n",15 );
+					spellingAidApp.window.append(spellingAidApp.pColor,"\n You got "+ correctAnsCount +" out of "+ getNoOfQuestions() + " words correct on the first attempt.\n\n",15 );
 					spellingAidApp.revertToOriginal();
 				}
 			}

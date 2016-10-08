@@ -16,7 +16,6 @@ import javax.sound.sampled.FloatControl;
 public class AudioPlayer {
 	static double durationInSeconds;
 	static Clip clip;
-	
 	// This method plays a looped music clip to ensure GUI is functioning properly
 	public static void playLoopSound(String file, float volume) {
 
