@@ -7,7 +7,8 @@ import java.io.PrintWriter;
 /**
  * 
  * This class contains functions that clear the statistic files and displays a confirmation to the user
- * @authors yyap601 hchu167
+ * @author hchu167
+ * @collaborator yyap601
  *
  */
 public class ClearStatistics {

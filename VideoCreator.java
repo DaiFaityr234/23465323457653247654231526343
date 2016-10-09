@@ -7,7 +7,8 @@ import javax.swing.SwingWorker;
 /**
  * 
  * This class exists to create the video with special effects if it doesn't exist
- * @authors yyap601 hchu167
+ * @author hchu167
+ * @collaborator yyap601
  *
  */
 public class VideoCreator extends SwingWorker<Void,Void>{

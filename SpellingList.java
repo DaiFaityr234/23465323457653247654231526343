@@ -17,8 +17,8 @@ import javax.swing.SwingWorker;
  * and generate festival commands during the spelling quiz.
  * Getter functions are also used so GUI output and statistics
  * can be linked in a proper manner.
- * @authors yyap601 hchu167
- *
+ * @author hchu167
+ * @collaborator yyap601
  */
 public class SpellingList {
 	// initialising variables to use during quiz TO KEEP TRACK OF QUESTIONS AND ATTEMPT COUNTS
@@ -52,6 +52,8 @@ public class SpellingList {
 	// Number of correct answers
 	private int correctAnsCount = 0;
 
+	// List to store level labels
+	static ArrayList<String> levelNames = new ArrayList<String>();
 	// List to ask questions from 
 	ArrayList<String> currentQuizList ;
 	// List to record stats for the current level
@@ -195,7 +197,7 @@ public class SpellingList {
 			return null;
 		}		
 		protected void done(){
-			
+			levelNames.clear();
 			if(getNoOfQuestions()==0){
 				spellingAidApp.revertToOriginal();
 			}
@@ -489,6 +491,7 @@ public class SpellingList {
 			while(word != null){
 				// % = level and so do appropriate things
 				if(word.charAt(0) == '%'){
+					levelNames.add(word.substring(1));
 					String[] levelNo = word.split(" ");
 					newSpellingLevel = Integer.parseInt(levelNo[1]);
 					wordsInALevel = new ArrayList<String>();
@@ -499,7 +502,6 @@ public class SpellingList {
 				word = readWordList.readLine();
 			}
 			readWordList.close();
-
 			// TRIED WORDS
 			BufferedReader readTriedList = new BufferedReader(new FileReader(spelling_aid_tried_words));
 			String triedWord = readTriedList.readLine();

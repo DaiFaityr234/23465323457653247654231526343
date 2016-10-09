@@ -8,8 +8,9 @@ import javax.swing.SwingWorker;
 /**
  * 
  * This class governs the main logic for generating festival voices
- * for pronouncing sentences and spelling words
- * @authors yyap601 hchu167
+ * and pronouncing sentences and spelling words
+ * @author hchu167
+ * @collaborator yyap601 
  *
  */
 public class VoiceGenerator extends SwingWorker<Void, Void>{

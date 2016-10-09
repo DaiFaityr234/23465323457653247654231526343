@@ -43,7 +43,8 @@ import spelling.VoiceGenerator.Voice;
  * 
  * This class controls the creation of the spelling aid GUI and manages when
  * different panels are visible during the spelling tests.
- * @authors yyap601 hchu167
+ * @author hchu167
+ * @collaborator yyap601
  *
  */
 @SuppressWarnings("serial")
@@ -90,7 +91,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public JComboBox voxSelect = new JComboBox(new String[]{"Default","Auckland"});
 	public JLabel accuracyIndicator = new JLabel("Level X:");
 	public JButton stopQuiz = new JButton("Stop Quiz");
-	
+
 	//Boolean to check whether quiz is interrupted
 	public boolean quizInterrupted;
 	//Boolean to check whether GUI is in review mode
@@ -103,7 +104,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public JScrollPane scrollBar = new JScrollPane(window);
 	public LevelSelector levelSelect;
 	//Colours
-	
+
 	public Color tColor = new Color(31,190,214); //spelling (t)ab color
 	public Color qColor = new Color(255,113,126); //spelling (q)uiz functionality color
 	public Color hColor = new Color(151, 195, 10); //spelling (h)elper color
@@ -164,7 +165,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 
 		//Set button alignment layout for main GUI
 		tabs.setLayout(options);
-		
+
 		tabs.setBackground(tColor);
 		options.setAlignment(FlowLayout.TRAILING);
 		controller.setLayout(new BoxLayout(controller, BoxLayout.Y_AXIS));
@@ -230,7 +231,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		spellPrompt.setForeground(hColor);
 		spellPrompt.setAlignmentX(Component.CENTER_ALIGNMENT);
 		controller.add(spellPrompt);
-		
+
 		userInput.setSize(new Dimension(50, 15));
 		userInput.setAlignmentX(Component.CENTER_ALIGNMENT);
 		controller.add(userInput);
@@ -324,14 +325,14 @@ public class SpellingAid extends JFrame implements ActionListener{
 		controller.setVisible(false); //hide controller until spelling quiz starts
 		nextState.setVisible(false); //hide nextState until spelling quiz ends
 		frame.addWindowListener(new java.awt.event.WindowAdapter() {
-		    @Override
-		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-		    	File check = new File("wordList");
-		    	if (check.exists()){
-			    	check.delete(); // destroys user chosen wordList after GUI closes
-		    	}
+			@Override
+			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+				File check = new File("wordList");
+				if (check.exists()){
+					check.delete(); // destroys user chosen wordList after GUI closes
+				}
 
-		    }
+			}
 		});
 		// clear the window
 		window.setText("");
@@ -341,13 +342,13 @@ public class SpellingAid extends JFrame implements ActionListener{
 		window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 		window.append(pColor,"                                       Please select your language:\n",15);
 		window.append(pColor,"                                     Please select from one of the options above:",15);
-		
-		
+
+
 		languageSelect.setSize( languageSelect.getPreferredSize() );
 		languageSelect.setLocation(362, 60);
 		languageSelect.setSize( languageSelect.getPreferredSize() );
 		window.add( languageSelect );
-		 
+
 		//Disable any editing from user
 		window.setEditable(false);
 
@@ -370,7 +371,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 
 		// JTextField tracks ENTER button
 		userInput.addActionListener(enterAction);
-		
+
 		stopQuiz.setToolTipText("You can only use this button during the answering phase in a quiz.");
 
 	}
@@ -387,21 +388,21 @@ public class SpellingAid extends JFrame implements ActionListener{
 				File file = wordList.getSelectedFile();
 				InputStream input = null;
 				OutputStream output = null;
-			    	try{
-			    	    File fileCopy =new File("wordList");
-			    	    input = new FileInputStream(file);
-			    	    output = new FileOutputStream(fileCopy);
-			    	    byte[] buffer = new byte[1024];
-			    	    int length;
-			    	    //copy the file content in bytes
-			    	    while ((length = input.read(buffer)) > 0){
-			    	    	output.write(buffer, 0, length);
-			    	    }
-			    	    input.close();
-			    	    output.close();
-			    	}catch(IOException e){
-			    	    e.printStackTrace();
-			    	}
+				try{
+					File fileCopy =new File("wordList");
+					input = new FileInputStream(file);
+					output = new FileOutputStream(fileCopy);
+					byte[] buffer = new byte[1024];
+					int length;
+					//copy the file content in bytes
+					while ((length = input.read(buffer)) > 0){
+						output.write(buffer, 0, length);
+					}
+					input.close();
+					output.close();
+				}catch(IOException e){
+					e.printStackTrace();
+				}
 			}
 			if (val == JFileChooser.CANCEL_OPTION){
 			}
@@ -430,7 +431,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent ae) {
 		//Setting internal representation for each option chosen
 		if (ae.getSource() == newQuiz) {
-			
+
 			reviewMode = false;
 			quizInterrupted = false;
 			if (!foreign){
@@ -442,7 +443,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			window.setCaretPosition(0);
 			spellList = new SpellingList(); //Create new list of 10 words
 			LevelSelector levelSelect = new LevelSelector(); //Create new joptionpane to select level
-			if(levelSelect.getLevel()!=0){ // only when a level is selected, that u start changing the window's content
+			if(levelSelect.getLevel()!=0 && levelSelect.getLevel()!=-1){ // only when a level is selected, that u start changing the window's content
 				languageSelect.setVisible(false);
 				AudioPlayer.stopSound();
 				frame.getContentPane().remove(tabs);
@@ -461,7 +462,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 				window.append(pColor,"                    New Spelling Quiz ( Level "+ levelSelect.getLevel() +" )\n",18);
 				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
-				 
+
 				//Start asking questions
 				if (SpellingList.playingTrack7){
 					AudioPlayer.playLoopSound(".ON/Track7.wav",-27.5f);
@@ -484,7 +485,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			}
 		}
 		else if (ae.getSource() == reviewMistakes) {
-			
+
 			reviewMode = true;
 			quizInterrupted = false;
 			if (!foreign){
@@ -567,7 +568,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			}
 		}
 		else if (ae.getSource() == voxSelect) {
-			
+
 			// sets the chosen voice
 			if (voxSelect.getSelectedItem().toString().equals("Default")){
 				theVoice = Voice.DEFAULT;

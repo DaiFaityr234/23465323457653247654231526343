@@ -19,7 +19,8 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
  * 
  * This class creates the main window that opens when the user chooses
  * to view a video reward, whether it is the special video or not.
- * @authors yyap601 hchu167
+ * @author hchu167
+ * @collaborator yyap601
  *
  */
 @SuppressWarnings("serial")
