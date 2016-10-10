@@ -12,6 +12,13 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+/**
+ * 
+ * This class creators a custom selector that allows the user to select a starting level
+ * from a user-supplied word list
+ * @author hchu167
+ *
+ */
 public class CustomSelector implements ActionListener{
 	final JLabel levelPrompt = new JLabel("Select a level:");
 	public Color qColor = new Color(255,113,126); //spelling (q)uiz functionality color
@@ -19,6 +26,7 @@ public class CustomSelector implements ActionListener{
 	public Color wColor = new Color(248,248,242); //(w)hite color - better version for eyes
 	public Color DqColor = qColor.darker();
 	public static String newExtraLevel = "NULL";
+	private static int level;
 	public CustomSelector(){
 		int dialog = JOptionPane.showOptionDialog(null,
 				makePanel(),
@@ -62,14 +70,22 @@ public class CustomSelector implements ActionListener{
 		}
 		if(b != null) {
 			bLabel = b.getText();
+			for (int i = 0; i < SpellingList.specialNames.size(); i++){
+				if (bLabel.equals(SpellingList.specialNames.get(i))){
+					level = i+1;
+				}
+			}
 			String[] splitLabel = bLabel.split(" ");
 			newExtraLevel = splitLabel[1];
-			System.out.println(newExtraLevel);
 		}
 		JOptionPane.getRootFrame().dispose();  
 	}
 	
 	public static String getExtra(){
 		return newExtraLevel;
+	}
+	
+	public static int getLevel(){
+		return level;
 	}
 }

@@ -148,14 +148,16 @@ public class SpellingAid extends JFrame implements ActionListener{
 	// Method to ask next question in the quiz
 	public void goOnToNextQuestion(){
 		if(spellList.spellType.equals("new")){
-			accuracyIndicator.setText("Level "+ spellList.getCurrentLevel()+" Accuracy: "+spellList.getLvlAccuracy()+"%");
-			currentAcc = spellList.getLvlAccuracy();
-			if (currentAcc>= 80.0){
-				accuracyIndicator.setForeground(hColor);
-			} else if (currentAcc>= 60.0){
-				accuracyIndicator.setForeground(tColor);
-			} else {
-				accuracyIndicator.setForeground(qColor);
+			if (!SpellingList.extraLevels){
+				accuracyIndicator.setText("Level "+ spellList.getCurrentLevel()+" Accuracy: "+spellList.getLvlAccuracy()+"%");
+				currentAcc = spellList.getLvlAccuracy();
+				if (currentAcc>= 80.0){
+					accuracyIndicator.setForeground(hColor);
+				} else if (currentAcc>= 60.0){
+					accuracyIndicator.setForeground(tColor);
+				} else {
+					accuracyIndicator.setForeground(qColor);
+				}
 			}
 		}
 		if(spellList.status.equals("ASKING")){
@@ -423,6 +425,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			spellList = new SpellingList(); //Create new list of 10 words
 			LevelSelector levelSelect = new LevelSelector(); //Create new joptionpane to select level
 			if(levelSelect.getLevel()!=0 && levelSelect.getLevel()!=-1){ // only when a level is selected, that u start changing the window's content
+				SpellingList.extraLevels = false;
 				languageSelect.setVisible(false);
 				addList.setVisible(false);
 				AudioPlayer.stopSound();
@@ -445,7 +448,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 
 				//Start asking questions
 				if (SpellingList.playingTrack7){
-					AudioPlayer.playLoopSound(".ON/Track7.wav",-27.5f);
+					AudioPlayer.playLoopSound(".ON/Track7.wav",-12.5f);
 				}
 				SpellingList.playingTrack7 = false;
 				spellList.createLevelList(levelSelect.getLevel(), "new",this);
@@ -462,21 +465,35 @@ public class SpellingAid extends JFrame implements ActionListener{
 				questionAsker.execute();
 				//spellingLvl=spellList.getQuestion(); // initiate swing worker
 				//spellingLvl.execute(); // execute quiz
-			} else if (levelSelect.getLevel()==-1) {
-				languageSelect.setVisible(false);
-				addList.setVisible(false);
-				AudioPlayer.stopSound();
-				frame.getContentPane().remove(tabs);
-				progressBar.setVisible(true);
-				frame.getContentPane().add(progressBar, BorderLayout.NORTH);
-				progressBar.setValue(0);
-				controller.setVisible(true);
-				// clear the window
-				window.setText("");
-				//Display new spelling message to GUI
-				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
-				window.append(pColor,"                    New Spelling Quiz ( Level "+CustomSelector.getExtra() +" )\n",18);
-				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
+			} else if (levelSelect.getLevel()==-1 && SpellingList.extraLevels) {
+				if (CustomSelector.getExtra().equals("NULL")){
+					SpellingList.specialNames.clear();
+				}
+				if (!CustomSelector.getExtra().equals("NULL")){
+					languageSelect.setVisible(false);
+					addList.setVisible(false);
+					AudioPlayer.stopSound();
+					frame.getContentPane().remove(tabs);
+					progressBar.setVisible(true);
+					frame.getContentPane().add(progressBar, BorderLayout.NORTH);
+					progressBar.setValue(0);
+					controller.setVisible(true);
+					if(!notFirstTime){
+						// clear the window
+						window.setText("");
+						notFirstTime = true;
+					}
+					// clear the window
+					window.setText("");
+					//Display new spelling message to GUI
+					window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
+					window.append(pColor,"                     New Spelling Quiz ( Level "+CustomSelector.getExtra() +" )\n",18);
+					window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
+					spellList.createLevelList(CustomSelector.getLevel(), "new",this);
+					questionAsker = spellList.getQuestionAsker();
+					questionAsker.execute();
+				}
+
 			} else {
 				SpellingList.specialNames.clear();
 			}

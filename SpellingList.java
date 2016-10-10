@@ -62,7 +62,7 @@ public class SpellingList {
 	// List to record stats for the current level
 	ArrayList<String> currentFailedList ;
 	ArrayList<String> currentTriedList ;
-
+	ArrayList<String> listOfWordsToChooseFrom;
 	// Files that contains the word lists and statistics
 	File wordList;
 	File customList;
@@ -77,13 +77,17 @@ public class SpellingList {
 	HashMap<Integer, ArrayList<String>> mapOfFailedWords;
 	HashMap<Integer, ArrayList<String>> mapOfTriedWords;
 
-	// Special ArrayList for extra levels
+	// Special ArrayLists for extra levels
 	HashMap<Integer, ArrayList<String>> mapOfExtraWords;
+	HashMap<Integer, ArrayList<String>> mapOfExtraTriedWords;
+	HashMap<Integer, ArrayList<String>> mapOfExtraFailedWords;
 	// Hashmaps to store accuracy related values for every level
 	HashMap<Integer,Integer> totalAsked;
 	HashMap<Integer,Integer> totalCorrect;
 
-
+	// Special HashMaps for accuracy values
+	HashMap<Integer,Integer> totalExtraAsked;
+	HashMap<Integer,Integer> totalExtraCorrect;
 	// Constructor of spellinglist model for current session
 	public SpellingList(){
 		check = new File("wordList");
@@ -128,6 +132,7 @@ public class SpellingList {
 
 	// Creates a list of words to test according to level and mode
 	public void createLevelList(int level, String spellingType, SpellingAid spellAidApp){
+
 		// For every level these following variables start as follows
 		questionNo = 0;
 		quizProgress = 0;
@@ -141,26 +146,51 @@ public class SpellingList {
 
 		// choose list to read from according to mode
 		HashMap<Integer, ArrayList<String>> wordMap;
-		if(spellingType.equals("new")){
+		if(spellingType.equals("new") && !extraLevels){
 			wordMap = mapOfWords;
+		} else if (extraLevels){
+			wordMap = mapOfExtraWords;
+		} else{
+			if (extraLevels){
+				wordMap = mapOfExtraFailedWords; 
+			} else{
+				wordMap = mapOfFailedWords; 
+			}	
+		}
+		// if level has not been attempted, create a list for that level since it won't exist
+		if(!extraLevels){
+			if(mapOfFailedWords.get(currentLevel)==null){
+				mapOfFailedWords.put(currentLevel, new ArrayList<String>());
+			}
+			if(mapOfTriedWords.get(currentLevel)==null){
+				mapOfTriedWords.put(currentLevel, new ArrayList<String>());
+			}
+			if(totalAsked.get(currentLevel)==null){
+				totalAsked.put(currentLevel, 0);
+				totalCorrect.put(currentLevel, 0);
+			}
 		} else {
-			wordMap = mapOfFailedWords; 
+			/*
+			if(mapOfExtraFailedWords.get(currentLevel)==null){
+				mapOfExtraFailedWords.put(currentLevel, new ArrayList<String>());
+			}
+			if(mapOfExtraTriedWords.get(currentLevel)==null){
+				mapOfExtraTriedWords.put(currentLevel, new ArrayList<String>());
+			}
+			if(totalExtraAsked.get(currentLevel)==null){
+				totalExtraAsked.put(currentLevel, 0);
+				totalExtraCorrect.put(currentLevel, 0);
+			}
+			*/
 		}
 
-		// if level has not been attempted, create a list for that level since it won't exist
-		if(mapOfFailedWords.get(currentLevel)==null){
-			mapOfFailedWords.put(currentLevel, new ArrayList<String>());
-		}
-		if(mapOfTriedWords.get(currentLevel)==null){
-			mapOfTriedWords.put(currentLevel, new ArrayList<String>());
-		}
-		if(totalAsked.get(currentLevel)==null){
-			totalAsked.put(currentLevel, 0);
-			totalCorrect.put(currentLevel, 0);
-		}
 
 		// produce 10 random words from the correct list of words
-		ArrayList<String> listOfWordsToChooseFrom = wordMap.get(level);
+		if (extraLevels){
+			listOfWordsToChooseFrom = wordMap.get(level);
+		} else {
+			listOfWordsToChooseFrom = wordMap.get(level);
+		}
 		ArrayList<String> listOfWordsToTest = new ArrayList<String>();
 		HashMap<String,Integer> uniqueWordsToTest = new HashMap<String,Integer>();
 
@@ -168,10 +198,8 @@ public class SpellingList {
 		if(spellingType.equals("review")){
 			if(listOfWordsToChooseFrom.size()<10){
 				questionListSize = listOfWordsToChooseFrom.size();
-
 			}
 		}
-
 		while(uniqueWordsToTest.keySet().size() != questionListSize){
 			int positionToChoose = (int) Math.floor(Math.random() * listOfWordsToChooseFrom.size());
 			if(uniqueWordsToTest.get(listOfWordsToChooseFrom.get(positionToChoose)) == null){
@@ -180,16 +208,24 @@ public class SpellingList {
 			}
 
 		}
-
 		// initialise lists to quiz and also change statistics
 		currentQuizList = listOfWordsToTest;
-		currentFailedList = mapOfFailedWords.get(currentLevel);
-		currentTriedList = mapOfTriedWords.get(currentLevel);
+		if(!extraLevels){
+			currentFailedList = mapOfFailedWords.get(currentLevel);
+			currentTriedList = mapOfTriedWords.get(currentLevel);
+		} else {
+			/*
+			currentFailedList = mapOfExtraFailedWords.get(currentLevel);
+			currentTriedList = mapOfExtraTriedWords.get(currentLevel);
+			*/
+		}
+		
 	}
 
 	// QuestionAsker is a swing worker class which asks the next question on the list.
 	// The swing worker terminates when the whole list is covered
 	class QuestionAsker extends SwingWorker<Void, Void>{
+
 		protected Void doInBackground() throws Exception {
 			if(getNoOfQuestions()!=0){
 				askNextQuestion();
@@ -211,7 +247,7 @@ public class SpellingList {
 			}
 			// stop the quiz and record progress when the whole quiz list has been covered
 			if(questionNo == 11){
-				AudioPlayer.stopSound();
+				AudioPlayer.stopSound();		
 			}
 			if(questionNo > getNoOfQuestions()){
 				recordFailedAndTriedWordsFromLevel();
@@ -279,6 +315,7 @@ public class SpellingList {
 	private void askNextQuestion() throws InterruptedException{
 		// make sure user input field is cleared everytime a question is asked
 		spellingAidApp.userInput.setText("");
+		spellingAidApp.accuracyIndicator.setText("");
 		// < NoOfQuestion because questionNo is used to access the current quiz list's question which starts at 0
 		if(questionNo < getNoOfQuestions()){
 
@@ -351,26 +388,34 @@ public class SpellingList {
 					AudioPlayer.playSound(".ON/Bit3.wav");
 				}
 			}
+			if (!extraLevels){
+				//processStarter("echo Correct | festival --tts"); 
+				if(!attempt){
+					Tools.record(spelling_aid_statistics,wordToSpell+" Mastered"); // store as mastered
+					correctAnsCount++; //question answered correctly
+				} else {
+					Tools.record(spelling_aid_statistics,wordToSpell+" Faulted"); // store as faulted
+				}
 
-			//processStarter("echo Correct | festival --tts"); 
-			if(!attempt){
-				Tools.record(spelling_aid_statistics,wordToSpell+" Mastered"); // store as mastered
-				correctAnsCount++; //question answered correctly
+				// increment the counter which stores the total number of correct answers in the current level
+				int totalNumberOfCorrectsInLevel = totalCorrect.get(currentLevel)+1;
+				totalCorrect.put(currentLevel, totalNumberOfCorrectsInLevel);
+
+				if(currentFailedList.contains(wordToSpell)){ // remove from failed list if exists
+					currentFailedList.remove(wordToSpell);
+				}
+				attempt = true; // question has been attempted
+				endOfQuestion = true;
+				// answer is correct and so proceed to ASKING the next question
+				status = "ASKING";
 			} else {
-				Tools.record(spelling_aid_statistics,wordToSpell+" Faulted"); // store as faulted
+				attempt = true; // question has been attempted
+				endOfQuestion = true;
+				status = "ASKING";
+				quizProgress= quizProgress+10;
+				spellingAidApp.progressBar.setValue(quizProgress);
 			}
 
-			// increment the counter which stores the total number of correct answers in the current level
-			int totalNumberOfCorrectsInLevel = totalCorrect.get(currentLevel)+1;
-			totalCorrect.put(currentLevel, totalNumberOfCorrectsInLevel);
-
-			if(currentFailedList.contains(wordToSpell)){ // remove from failed list if exists
-				currentFailedList.remove(wordToSpell);
-			}
-			attempt = true; // question has been attempted
-			endOfQuestion = true;
-			// answer is correct and so proceed to ASKING the next question
-			status = "ASKING";
 		} else {
 			if(!attempt){
 				spellingAidApp.window.append(spellingAidApp.pColor,userAnswer,15);
@@ -413,7 +458,8 @@ public class SpellingList {
 	}
 
 	/// This method records everything related to the current level to the file
-	public void recordFailedAndTriedWordsFromLevel(){
+	public void recordFailedAndTriedWordsFromLevel(){		
+
 		Object[] failedKeys = mapOfFailedWords.keySet().toArray();
 		Object[] triedKeys = mapOfFailedWords.keySet().toArray();
 		Object[] accuracyKeys = totalAsked.keySet().toArray();
@@ -510,8 +556,9 @@ public class SpellingList {
 				}
 				word = readWordList.readLine();
 			}
+
 			readWordList.close();
-			
+
 			// CUSTOMLIST
 			if (extraLevels){
 				BufferedReader readCustomList = new BufferedReader(new FileReader(customList));
@@ -524,16 +571,19 @@ public class SpellingList {
 					if(w.charAt(0) == '%'){
 						specialNames.add(w.substring(1));
 						wordsInLevel = new ArrayList<String>();
+						for (int i = 0; i < SpellingList.specialNames.size(); i++){
+							if (w.substring(1).equals(SpellingList.specialNames.get(i))){
+								spellingLevel = i+1;
+							}
+						}
 						mapOfExtraWords.put(spellingLevel,wordsInLevel);
-						spellingLevel++;
 					} else {
-						wordsInLevel.add(word);
+						wordsInLevel.add(w);
 					}
 					w = readCustomList.readLine();
 				} 
 				readCustomList.close();
 			}
-
 			// TRIED WORDS
 			BufferedReader readTriedList = new BufferedReader(new FileReader(spelling_aid_tried_words));
 			String triedWord = readTriedList.readLine();
