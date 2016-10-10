@@ -34,6 +34,7 @@ public class SpellingList {
 	// True if question has been attempted (according to current question)
 	private boolean attempt = false; 
 	private boolean endOfQuestion = false;
+	public static boolean extraLevels = false;
 	public boolean duringq; //keep track of whether the user is still in a question
 	public boolean faulted; //keep track of when word is faulted
 	public static boolean playingTrack1;
@@ -54,14 +55,17 @@ public class SpellingList {
 
 	// List to store level labels
 	static ArrayList<String> levelNames = new ArrayList<String>();
+	// List to store special levels
+	static ArrayList<String> specialNames = new ArrayList<String>();
 	// List to ask questions from 
 	ArrayList<String> currentQuizList ;
 	// List to record stats for the current level
 	ArrayList<String> currentFailedList ;
 	ArrayList<String> currentTriedList ;
 
-	// Files that contains the word list and statistics
+	// Files that contains the word lists and statistics
 	File wordList;
+	File customList;
 	File spelling_aid_tried_words;
 	File spelling_aid_failed;
 	File spelling_aid_statistics;
@@ -73,6 +77,8 @@ public class SpellingList {
 	HashMap<Integer, ArrayList<String>> mapOfFailedWords;
 	HashMap<Integer, ArrayList<String>> mapOfTriedWords;
 
+	// Special ArrayList for extra levels
+	HashMap<Integer, ArrayList<String>> mapOfExtraWords;
 	// Hashmaps to store accuracy related values for every level
 	HashMap<Integer,Integer> totalAsked;
 	HashMap<Integer,Integer> totalCorrect;
@@ -82,10 +88,12 @@ public class SpellingList {
 	public SpellingList(){
 		check = new File("wordList");
 		// Files that contains the word list and statistics
-		if (!check.exists()){
-			wordList = new File("NZCER-spelling-lists.txt");
+		wordList = new File("NZCER-spelling-lists.txt");
+		if (check.exists()){
+			extraLevels = true;
+			customList = new File("wordList");
 		} else {
-			wordList = new File("wordList");
+			extraLevels = false;
 		}
 		spelling_aid_tried_words = new File(".spelling_aid_tried_words");
 		spelling_aid_failed = new File(".spelling_aid_failed");
@@ -213,7 +221,7 @@ public class SpellingList {
 					playingTrack2 = true;
 					playingTrack7 = false;
 				} else if (correctAnsCount >= 7){
-					AudioPlayer.playLoopSound(".ON/Track1.wav",-7.5f);
+					AudioPlayer.playLoopSound(".ON/Track1.wav",-12.5f);
 					playingTrack1 = true;
 					playingTrack2 = false;
 					playingTrack7 = false;
@@ -229,7 +237,7 @@ public class SpellingList {
 					} else {
 						spellingAidApp.window.append(spellingAidApp.pColor,"\n You got "+ correctAnsCount +" out of "+ getNoOfQuestions() + " words correct on the first attempt.\n\n",15 );
 					}
-					
+
 					spellingAidApp.changeToNextState();
 				} else if (spellType.equals("review")){
 					spellingAidApp.window.append(spellingAidApp.pColor,"\n You got "+ correctAnsCount +" out of "+ getNoOfQuestions() + " words correct on the first attempt.\n\n",15 );
@@ -287,12 +295,12 @@ public class SpellingList {
 			wordToSpell = currentQuizList.get(questionNo);
 			// then increment the question no to represent the real question number
 			questionNo++;
-			
-			
+
+
 			if (questionNo != 1){
 				Thread.sleep(500);
 			}
-			
+
 
 			// after ASKING, it is time for ANSWERING
 			status = "ANSWERING";
@@ -319,7 +327,7 @@ public class SpellingList {
 
 
 		// if it is valid, start the checking
-	
+
 		// turn to lower case for BOTH and then compare
 		if(userAnswer.toLowerCase().equals(wordToSpell.toLowerCase())){
 			// Correct echoed if correct
@@ -401,7 +409,7 @@ public class SpellingList {
 				currentTriedList.add(wordToSpell);
 			}
 		}
-		
+
 	}
 
 	/// This method records everything related to the current level to the file
@@ -478,6 +486,7 @@ public class SpellingList {
 		totalAsked = new HashMap<Integer,Integer>();
 		totalCorrect = new HashMap<Integer,Integer>();
 
+		mapOfExtraWords = new HashMap<Integer, ArrayList<String>>();
 		try {
 			// start adding file contents to the appropriate array list
 
@@ -502,6 +511,29 @@ public class SpellingList {
 				word = readWordList.readLine();
 			}
 			readWordList.close();
+			
+			// CUSTOMLIST
+			if (extraLevels){
+				BufferedReader readCustomList = new BufferedReader(new FileReader(customList));
+				String w = readCustomList.readLine();
+				ArrayList<String> wordsInLevel = new ArrayList<String>();
+				// level at which the word storage is happening
+				int spellingLevel = 1;
+				while(w != null){
+					// % = level and so do appropriate things
+					if(w.charAt(0) == '%'){
+						specialNames.add(w.substring(1));
+						wordsInLevel = new ArrayList<String>();
+						mapOfExtraWords.put(spellingLevel,wordsInLevel);
+						spellingLevel++;
+					} else {
+						wordsInLevel.add(word);
+					}
+					w = readCustomList.readLine();
+				} 
+				readCustomList.close();
+			}
+
 			// TRIED WORDS
 			BufferedReader readTriedList = new BufferedReader(new FileReader(spelling_aid_tried_words));
 			String triedWord = readTriedList.readLine();

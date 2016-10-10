@@ -8,9 +8,12 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -89,7 +92,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public JLabel voxPrompt = new JLabel("Voice Toggle");
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JComboBox voxSelect = new JComboBox(new String[]{"Default","Auckland"});
-	public JLabel accuracyIndicator = new JLabel("Level X:");
+	public JLabel accuracyIndicator = new JLabel();
 	public JButton stopQuiz = new JButton("Stop Quiz");
 
 	//Boolean to check whether quiz is interrupted
@@ -100,6 +103,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public ColorPane window = new ColorPane();
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JComboBox languageSelect = new JComboBox(new String[]{"English","Chinese","Japanese"});
+	public JButton addList = new JButton("Import extra spelling levels");
 	public boolean foreign = false;
 	public JScrollPane scrollBar = new JScrollPane(window);
 	public LevelSelector levelSelect;
@@ -309,6 +313,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		stopQuiz.addActionListener(this);
 		voxSelect.addActionListener(this);
 		languageSelect.addActionListener(this);
+		addList.addActionListener(this);
 		_replayLevel.addActionListener(this);
 		_nextLevel.addActionListener(this);
 		_videoReward.addActionListener(this);
@@ -339,16 +344,17 @@ public class SpellingAid extends JFrame implements ActionListener{
 		//Display welcome message to GUI
 		window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 		window.append(pColor,"                                              Welcome to the Spelling Aid\n",18);
-		window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
-		window.append(pColor,"                                       Please select your language:\n",15);
-		window.append(pColor,"                                     Please select from one of the options above:",15);
+		window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
+		window.append(pColor,"                                       Please select your language:\n\n",15);
+		window.append(pColor,"\n\n                                     Please select from one of the options above:",15);
 
 
 		languageSelect.setSize( languageSelect.getPreferredSize() );
-		languageSelect.setLocation(362, 60);
-		languageSelect.setSize( languageSelect.getPreferredSize() );
+		languageSelect.setLocation(365, 83);
 		window.add( languageSelect );
-
+		addList.setSize(addList.getPreferredSize());
+		addList.setLocation(210, 120);
+		window.add(addList);
 		//Disable any editing from user
 		window.setEditable(false);
 
@@ -378,37 +384,10 @@ public class SpellingAid extends JFrame implements ActionListener{
 
 	public static void main(String[] args) {
 		try {
-			JFileChooser wordList = new JFileChooser();
-			wordList.setDialogTitle("Choose wordlist");
-			wordList.setAcceptAllFileFilterUsed(false);
-			FileFilter filter = new FileNameExtensionFilter("Only text files", "txt");
-			wordList.setFileFilter(filter);
-			int val = wordList.showSaveDialog(null);
-			if (val == JFileChooser.APPROVE_OPTION){
-				File file = wordList.getSelectedFile();
-				InputStream input = null;
-				OutputStream output = null;
-				try{
-					File fileCopy =new File("wordList");
-					input = new FileInputStream(file);
-					output = new FileOutputStream(fileCopy);
-					byte[] buffer = new byte[1024];
-					int length;
-					//copy the file content in bytes
-					while ((length = input.read(buffer)) > 0){
-						output.write(buffer, 0, length);
-					}
-					input.close();
-					output.close();
-				}catch(IOException e){
-					e.printStackTrace();
-				}
-			}
-			if (val == JFileChooser.CANCEL_OPTION){
-			}
+
 			// Preferred look and feel
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
-			AudioPlayer.playLoopSound(".ON/Track1.wav",-7.5f);
+			AudioPlayer.playLoopSound(".ON/Track1.wav",-12.5f);
 		} catch (UnsupportedLookAndFeelException ex) {
 			ex.printStackTrace();
 		} catch (IllegalAccessException ex) {
@@ -445,6 +424,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			LevelSelector levelSelect = new LevelSelector(); //Create new joptionpane to select level
 			if(levelSelect.getLevel()!=0 && levelSelect.getLevel()!=-1){ // only when a level is selected, that u start changing the window's content
 				languageSelect.setVisible(false);
+				addList.setVisible(false);
 				AudioPlayer.stopSound();
 				frame.getContentPane().remove(tabs);
 				progressBar.setVisible(true);
@@ -482,6 +462,23 @@ public class SpellingAid extends JFrame implements ActionListener{
 				questionAsker.execute();
 				//spellingLvl=spellList.getQuestion(); // initiate swing worker
 				//spellingLvl.execute(); // execute quiz
+			} else if (levelSelect.getLevel()==-1) {
+				languageSelect.setVisible(false);
+				addList.setVisible(false);
+				AudioPlayer.stopSound();
+				frame.getContentPane().remove(tabs);
+				progressBar.setVisible(true);
+				frame.getContentPane().add(progressBar, BorderLayout.NORTH);
+				progressBar.setValue(0);
+				controller.setVisible(true);
+				// clear the window
+				window.setText("");
+				//Display new spelling message to GUI
+				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
+				window.append(pColor,"                    New Spelling Quiz ( Level "+CustomSelector.getExtra() +" )\n",18);
+				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
+			} else {
+				SpellingList.specialNames.clear();
 			}
 		}
 		else if (ae.getSource() == reviewMistakes) {
@@ -499,6 +496,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			levelSelect = new LevelSelector(); //Create new joptionpane to select level
 			if(levelSelect.getLevel()!=0){ // only when a level is selected, that u start changing the window's content
 				languageSelect.setVisible(false);
+				addList.setVisible(false);
 				AudioPlayer.stopSound();
 				frame.getContentPane().remove(tabs);
 				controller.setVisible(true);				
@@ -525,6 +523,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		}
 		else if (ae.getSource() == viewStats) {
 			languageSelect.setVisible(false);
+			addList.setVisible(false);
 			// Scroll bar set to an arbitrary value
 			window.setCaretPosition(1);
 			// Scroll bar set to the top
@@ -544,6 +543,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		}
 		else if (ae.getSource() == clearStats) {
 			languageSelect.setVisible(false);
+			addList.setVisible(false);
 			// Scroll bar set to an arbitrary value
 			window.setCaretPosition(1);
 			// Scroll bar set to the top
@@ -586,6 +586,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				reviewMistakes.setText("Review Mistakes");
 				viewStats.setText("View Statistics");
 				clearStats.setText("Clear Statistics");
+				addList.setText("Import extra spelling levels");
 				_replayLevel.setText("Replay level");
 				_nextLevel.setText("Next level");
 				_videoReward.setText("Play video");
@@ -602,6 +603,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				reviewMistakes.setText("糾正錯字");
 				viewStats.setText("查看統計");
 				clearStats.setText("清除統計");
+				addList.setText("添加自定的拼字級");
 				_replayLevel.setText("再試拼字級");
 				_nextLevel.setText("試下拼字級");
 				_videoReward.setText("視頻廣播");
@@ -618,6 +620,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				reviewMistakes.setText("ミスを直す");
 				viewStats.setText("統計を分析");
 				clearStats.setText("統計を捨てる");
+				addList.setText("カスタムレベルを追加");
 				_replayLevel.setText("レベルリプレイ");
 				_nextLevel.setText("次のレベル");
 				_videoReward.setText("ビデオ放送");
@@ -629,9 +632,63 @@ public class SpellingAid extends JFrame implements ActionListener{
 				voxPrompt.setText("語調変更");
 				stopQuiz.setText("ストップ");
 			}
+		} else if (ae.getSource() == addList){
+			JFileChooser wordList = new JFileChooser();
+			wordList.setDialogTitle("Choose wordlist");
+			wordList.setAcceptAllFileFilterUsed(false);
+			FileFilter filter = new FileNameExtensionFilter("Only text files", "txt");
+			wordList.setFileFilter(filter);
+			int val = wordList.showSaveDialog(null);
+			if (val == JFileChooser.APPROVE_OPTION){
+				File file = wordList.getSelectedFile();
+				BufferedReader test;
+				try {
+					test = new BufferedReader(new FileReader(file));
+					String text = test.readLine();
+					if (text == null){
+						JOptionPane.showMessageDialog(frame,
+								"Please select a non-empty text file.",
+								"Textfile Error",
+								JOptionPane.ERROR_MESSAGE);
+						val = wordList.showSaveDialog(null);
+						file = wordList.getSelectedFile();
+					} else if (!text.contains("%")){
+						JOptionPane.showMessageDialog(frame,
+								"Please select a text file with % labels.",
+								"Textfile Error",
+								JOptionPane.ERROR_MESSAGE);
+						val = wordList.showSaveDialog(null);
+						file = wordList.getSelectedFile();
+					} 
+				} catch (FileNotFoundException e1) {
+					e1.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				InputStream input = null;
+				OutputStream output = null;
+				try{
+					File fileCopy =new File("wordList");
+					input = new FileInputStream(file);
+					output = new FileOutputStream(fileCopy);
+					byte[] buffer = new byte[1024];
+					int length;
+					//copy the file content in bytes
+					while ((length = input.read(buffer)) > 0){
+						output.write(buffer, 0, length);
+					}
+					input.close();
+					output.close();
+				}catch(IOException e){
+					e.printStackTrace();
+				}
+			}
+			if (val == JFileChooser.CANCEL_OPTION){
+			}
 		}
 		else if (ae.getSource() == stopQuiz) {
 			languageSelect.setVisible(false);
+			addList.setVisible(false);
 			if(spellList.status.equals("ANSWERING")){
 				quizInterrupted = true;
 				window.append(pColor,"\n\n Quiz has been cancelled. \n\n" ,18);

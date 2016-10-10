@@ -27,6 +27,8 @@ public class LevelSelector implements ActionListener{
 	public Color hColor = new Color(151, 195, 10); //spelling (h)elper color
 	public Color wColor = new Color(248,248,242); //(w)hite color - better version for eyes
 	public Color DqColor = qColor.darker();
+	public Color DhColor = hColor.darker();
+	public JButton extra;
 	public int newSpellingLevel = -1;
 	// Constructor for level selector
 	public LevelSelector(){
@@ -50,24 +52,31 @@ public class LevelSelector implements ActionListener{
 		panel.setBackground(wColor);
 		panel.add(levelPrompt);
 		makeButtons(SpellingList.levelNames, panel);
+		if (SpellingList.extraLevels) {
+			extra = makeButton("Extra", panel);
+			panel.add(extra);
+		}
 		return panel;
 
 	}
 	//Set operations for different buttons
 	public void actionPerformed(ActionEvent ae) {
-		//Setting internal representation for each option chosen
-		Object o = ae.getSource();
-		JButton b = null;
-		String bLabel = "";
-		if(o instanceof JButton){
-			b = (JButton)o;
+		if (ae.getSource() == extra){
+			new CustomSelector();
+		} else {
+			Object o = ae.getSource();
+			JButton b = null;
+			String bLabel = "";
+			if(o instanceof JButton){
+				b = (JButton)o;
+			}
+			if(b != null) {
+				bLabel = b.getText();
+				String[] splitLabel = bLabel.split(" ");
+				newSpellingLevel = Integer.parseInt(splitLabel[1]);
+			}
+			JOptionPane.getRootFrame().dispose();  
 		}
-		if(b != null) {
-			bLabel = b.getText();
-			String[] splitLabel = bLabel.split(" ");
-			newSpellingLevel = Integer.parseInt(splitLabel[1]);
-		}
-		JOptionPane.getRootFrame().dispose();  
 	}
 
 	public void makeButtons(ArrayList <String> list, JPanel p) {
@@ -79,6 +88,14 @@ public class LevelSelector implements ActionListener{
 			p.add(test);
 		}
 	}
+	
+	public JButton makeButton(String s, JPanel p) {
+			JButton test= new JButton(s);
+			test.setAlignmentX(Component.CENTER_ALIGNMENT);
+			test.addActionListener(this);
+			test.setForeground(DhColor);
+			return test;
+		}
 	public int getLevel(){
 		return newSpellingLevel;
 	}
