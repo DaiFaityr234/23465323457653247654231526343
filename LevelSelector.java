@@ -76,6 +76,7 @@ public class LevelSelector implements ActionListener{
 				newSpellingLevel = Integer.parseInt(splitLabel[1]);
 			}
 			JOptionPane.getRootFrame().dispose();  
+			AudioPlayer.stopSound();
 		}
 	}
 

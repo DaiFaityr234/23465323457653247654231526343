@@ -42,6 +42,8 @@ public class SpellingList {
 	public static boolean playingTrack7;
 	// Current word to spell
 	private String wordToSpell; 	 
+	// Current example provided
+	private String exampleToGive;
 	// There are three types of spelling status: ASKING, ANSWERING and ANSWERED
 	String status;
 	// User's answer is stored here
@@ -59,10 +61,13 @@ public class SpellingList {
 	static ArrayList<String> specialNames = new ArrayList<String>();
 	// List to ask questions from 
 	ArrayList<String> currentQuizList ;
+	// List of examples to words
+	ArrayList<String> currentExamples;
 	// List to record stats for the current level
 	ArrayList<String> currentFailedList ;
 	ArrayList<String> currentTriedList ;
 	ArrayList<String> listOfWordsToChooseFrom;
+	ArrayList<String> listOfExamplesToChooseFrom;
 	// Files that contains the word lists and statistics
 	File wordList;
 	File customList;
@@ -71,9 +76,10 @@ public class SpellingList {
 	File spelling_aid_statistics;
 	File spelling_aid_accuracy;
 	File check;
-
+	File examples;
 	// ArrayLists for storing file contents for easier processing later according to levels
 	HashMap<Integer, ArrayList<String>> mapOfWords;
+	public HashMap<Integer, ArrayList<String>> mapOfWordExamples;
 	HashMap<Integer, ArrayList<String>> mapOfFailedWords;
 	HashMap<Integer, ArrayList<String>> mapOfTriedWords;
 
@@ -91,6 +97,7 @@ public class SpellingList {
 	// Constructor of spellinglist model for current session
 	public SpellingList(){
 		check = new File("wordList");
+		examples = new File("NZCER-examples.txt");
 		// Files that contains the word list and statistics
 		wordList = new File("NZCER-spelling-lists.txt");
 		if (check.exists()){
@@ -125,6 +132,10 @@ public class SpellingList {
 		return wordToSpell;
 	}
 
+	//get current example
+	public String getCurrentExample(){
+		return exampleToGive;
+	}
 	//get correct answer count
 	public int getCorrectAns(){
 		return correctAnsCount;
@@ -188,10 +199,13 @@ public class SpellingList {
 		// produce 10 random words from the correct list of words
 		if (extraLevels){
 			listOfWordsToChooseFrom = wordMap.get(level);
+			listOfExamplesToChooseFrom = mapOfWordExamples.get(level);
 		} else {
 			listOfWordsToChooseFrom = wordMap.get(level);
+			listOfExamplesToChooseFrom = mapOfWordExamples.get(level);
 		}
 		ArrayList<String> listOfWordsToTest = new ArrayList<String>();
+		ArrayList<String> listOfExamples = new ArrayList<String>();
 		HashMap<String,Integer> uniqueWordsToTest = new HashMap<String,Integer>();
 
 		// if the mode is review, the list size should be the size of the list is the size is less than 10
@@ -202,13 +216,16 @@ public class SpellingList {
 		}
 		while(uniqueWordsToTest.keySet().size() != questionListSize){
 			int positionToChoose = (int) Math.floor(Math.random() * listOfWordsToChooseFrom.size());
+			
 			if(uniqueWordsToTest.get(listOfWordsToChooseFrom.get(positionToChoose)) == null){
 				uniqueWordsToTest.put(listOfWordsToChooseFrom.get(positionToChoose),1);
+				listOfExamples.add(listOfExamplesToChooseFrom.get(positionToChoose));
 				listOfWordsToTest.add(listOfWordsToChooseFrom.get(positionToChoose));
 			}
 
 		}
 		// initialise lists to quiz and also change statistics
+		currentExamples = listOfExamples;
 		currentQuizList = listOfWordsToTest;
 		if(!extraLevels){
 			currentFailedList = mapOfFailedWords.get(currentLevel);
@@ -236,7 +253,6 @@ public class SpellingList {
 				spellingAidApp.window.append(spellingAidApp.pColor,"                                             Review Spelling Quiz ( Level "+ spellingAidApp.levelSelect.getLevel() +" )\n",18);
 				spellingAidApp.window.append(spellingAidApp.pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
 				spellingAidApp.window.append(spellingAidApp.qColor," There are no words to review in this level.\n\n",15);
-				AudioPlayer.playLoopSound(".ON/Track3.wav",-0.0f);
 			}
 			return null;
 		}		
@@ -313,9 +329,15 @@ public class SpellingList {
 
 	// Start asking the new question
 	private void askNextQuestion() throws InterruptedException{
+		spellingAidApp.enter.setEnabled(false);
+		spellingAidApp.wordListen.setEnabled(false);
+		spellingAidApp.stopQuiz.setEnabled(false);
+		spellingAidApp.sentenceListen.setEnabled(false);
 		// make sure user input field is cleared everytime a question is asked
 		spellingAidApp.userInput.setText("");
-		spellingAidApp.accuracyIndicator.setText("");
+		if (extraLevels){
+			spellingAidApp.accuracyIndicator.setText("");
+		}
 		// < NoOfQuestion because questionNo is used to access the current quiz list's question which starts at 0
 		if(questionNo < getNoOfQuestions()){
 
@@ -330,6 +352,7 @@ public class SpellingList {
 			faulted = false;
 			// starts at 0
 			wordToSpell = currentQuizList.get(questionNo);
+			exampleToGive = currentExamples.get(questionNo);
 			// then increment the question no to represent the real question number
 			questionNo++;
 
@@ -340,9 +363,14 @@ public class SpellingList {
 
 
 			// after ASKING, it is time for ANSWERING
-			status = "ANSWERING";
+			
 			spellingAidApp.window.append(spellingAidApp.pColor," Spell word " + questionNo + " of " + currentQuizList.size() + ": ",15);
 			spellingAidApp.voiceGen.sayText("Please spell word " + questionNo + " of " + currentQuizList.size() + ": " + ",",wordToSpell+",");
+			status = "ANSWERING";
+			spellingAidApp.enter.setEnabled(true);
+			spellingAidApp.wordListen.setEnabled(true);
+			spellingAidApp.stopQuiz.setEnabled(true);
+			spellingAidApp.sentenceListen.setEnabled(true);
 		} else {
 			questionNo++;
 		}
@@ -351,7 +379,6 @@ public class SpellingList {
 
 	// This method checks if the answer is right and act accordingly
 	private void checkAnswer(){
-
 		// ensure that the answer is valid
 		if (!validInput(userAnswer)){
 			// warning dialog for invalid user input
@@ -392,9 +419,21 @@ public class SpellingList {
 				//processStarter("echo Correct | festival --tts"); 
 				if(!attempt){
 					Tools.record(spelling_aid_statistics,wordToSpell+" Mastered"); // store as mastered
+					spellingAidApp.score = spellingAidApp.score + 100;
+					if (spellingAidApp.score > spellingAidApp.highScore){
+						spellingAidApp.highScore = spellingAidApp.score;
+					}
+					spellingAidApp.scoreLabel.setText("Score: "+spellingAidApp.score);
+					spellingAidApp.personalBest.setText("Personal Best: "+spellingAidApp.highScore);
 					correctAnsCount++; //question answered correctly
 				} else {
 					Tools.record(spelling_aid_statistics,wordToSpell+" Faulted"); // store as faulted
+					spellingAidApp.score = spellingAidApp.score + 50;
+					if (spellingAidApp.score > spellingAidApp.highScore){
+						spellingAidApp.highScore = spellingAidApp.score;
+					}
+					spellingAidApp.scoreLabel.setText("Score: "+spellingAidApp.score);
+					spellingAidApp.personalBest.setText("Personal Best: "+spellingAidApp.highScore);
 				}
 
 				// increment the counter which stores the total number of correct answers in the current level
@@ -412,7 +451,12 @@ public class SpellingList {
 				attempt = true; // question has been attempted
 				endOfQuestion = true;
 				status = "ASKING";
-				quizProgress= quizProgress+10;
+				spellingAidApp.specialScore = spellingAidApp.specialScore + 500;
+				if (spellingAidApp.specialScore > spellingAidApp.highScore){
+					spellingAidApp.highScore = spellingAidApp.specialScore;
+				}
+				spellingAidApp.scoreLabel.setText("Special Score: "+spellingAidApp.specialScore);
+				spellingAidApp.personalBest.setText("Personal Best: "+spellingAidApp.highScore);
 				spellingAidApp.progressBar.setValue(quizProgress);
 			}
 
@@ -420,7 +464,8 @@ public class SpellingList {
 			if(!attempt){
 				spellingAidApp.window.append(spellingAidApp.pColor,userAnswer,15);
 				spellingAidApp.window.append(spellingAidApp.pColor,"\n       Incorrect, try once more: ",15);
-				spellingAidApp.voiceGen.sayText("Incorrect, try once more: "+",",wordToSpell+","+wordToSpell+",");
+				spellingAidApp.voiceGen.sayText("Incorrect, try once more: "+"...",wordToSpell);
+				spellingAidApp.voiceGen.sayText("",wordToSpell+",");
 				//processStarter("echo Incorrect, try once more: "+wordToSpell+" . "+wordToSpell+" . " + "| festival --tts");
 				// answer is wrong and a second chance is given and so back to ANSWERING
 				status = "ANSWERING";
@@ -433,6 +478,8 @@ public class SpellingList {
 				spellingAidApp.window.append(spellingAidApp.qColor,"\n\n",15);
 				//processStarter("echo Incorrect | festival --tts");
 				Tools.record(spelling_aid_statistics,wordToSpell+" Failed"); // store as failed
+				spellingAidApp.score = spellingAidApp.score -50;
+				spellingAidApp.scoreLabel.setText("Score: "+spellingAidApp.score);
 				if(!currentFailedList.contains(wordToSpell)){ //add to failed list if it doesn't exist
 					currentFailedList.add(wordToSpell);
 				}
@@ -527,6 +574,7 @@ public class SpellingList {
 	// Go through all the statistic files and also the file containing the word list 
 	private void initialiseListsToStoreValuesFromWordAndStatsList(){
 		mapOfWords = new HashMap<Integer, ArrayList<String>>();
+		mapOfWordExamples = new HashMap<Integer, ArrayList<String>>();
 		mapOfFailedWords = new HashMap<Integer, ArrayList<String>>();
 		mapOfTriedWords = new HashMap<Integer, ArrayList<String>>();
 		totalAsked = new HashMap<Integer,Integer>();
@@ -558,7 +606,24 @@ public class SpellingList {
 			}
 
 			readWordList.close();
-
+			
+			// WORDEXAMPLES
+			BufferedReader readExamples = new BufferedReader(new FileReader(examples));
+			String ex = readExamples.readLine();
+			ArrayList<String> examplesInALevel = new ArrayList<String>();
+			int newExLevel = 1;
+			while (ex != null) {
+				if(ex.charAt(0) == '%'){
+					String[] lvlNo = ex.split(" ");
+					newExLevel = Integer.parseInt(lvlNo[1]);
+					examplesInALevel = new ArrayList<String>();
+					mapOfWordExamples.put(newExLevel, examplesInALevel);
+				} else {
+					examplesInALevel.add(ex);
+				}
+				ex = readExamples.readLine();
+			}
+			readExamples.close();
 			// CUSTOMLIST
 			if (extraLevels){
 				BufferedReader readCustomList = new BufferedReader(new FileReader(customList));

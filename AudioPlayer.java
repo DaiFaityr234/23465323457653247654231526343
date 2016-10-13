@@ -31,6 +31,9 @@ public class AudioPlayer {
 
 			clip.loop(Clip.LOOP_CONTINUOUSLY);
 			clip.start();
+			if (!clip.isActive()){
+				audioInputStream.close();
+			}
 		} catch(Exception ex) {
 			System.out.println("Error with playing sound.");
 			ex.printStackTrace();
@@ -52,6 +55,9 @@ public class AudioPlayer {
 				gainControl.setValue(-15.0f); // soften sound effect less
 			}
 			clip.start();
+			if (!clip.isActive()){
+				audioInputStream.close();
+			}
 		} catch(Exception ex) {
 			System.out.println("Error with playing sound.");
 			ex.printStackTrace();
@@ -63,6 +69,8 @@ public class AudioPlayer {
 	}
 	static void stopSound() {
 		clip.stop(); //stop playing the looped clip
-		clip.close(); // this step is needed to free eclipse resources
+		clip.close(); 
+		clip.drain();
+		clip.flush();// these steps are needed to free eclipse resources
 	}
 }
