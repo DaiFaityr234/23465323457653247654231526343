@@ -493,22 +493,10 @@ public class SpellingAid extends JFrame implements ActionListener{
 					ex.printStackTrace();
 				}
 				SpellingList.extraLevels = false;
-				languageSelect.setVisible(false);
-				addList.setVisible(false);
-				help.setVisible(false);
-				AudioPlayer.stopSound();
-				frame.getContentPane().remove(tabs);
+				changeModes();
 				progressBar.setVisible(true);
 				frame.getContentPane().add(progressBar, BorderLayout.NORTH);
 				progressBar.setValue(0);
-				controller.setVisible(true);
-				if(!notFirstTime){
-					// clear the window
-					window.setText("");
-					notFirstTime = true;
-				}
-				// clear the window
-				window.setText("");
 				//Display new spelling message to GUI
 				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 				window.append(pColor,"                    New Spelling Quiz ( Level "+ levelSelect.getLevel() +" )\n",18);
@@ -532,21 +520,11 @@ public class SpellingAid extends JFrame implements ActionListener{
 					SpellingList.specialNames.clear();
 				}
 				if (!CustomSelector.getExtra().equals("NULL")){
-					languageSelect.setVisible(false);
-					addList.setVisible(false);
-					AudioPlayer.stopSound();
-					frame.getContentPane().remove(tabs);
+					
+					changeModes();
 					progressBar.setVisible(true);
 					frame.getContentPane().add(progressBar, BorderLayout.NORTH);
 					progressBar.setValue(0);
-					controller.setVisible(true);
-					if(!notFirstTime){
-						// clear the window
-						window.setText("");
-						notFirstTime = true;
-					}
-					// clear the window
-					window.setText("");
 					//Display new spelling message to GUI
 					window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 					window.append(pColor,"                     New Spelling Quiz ( Level "+CustomSelector.getExtra() +" )\n",18);
@@ -574,19 +552,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			spellList = new SpellingList(); //Create new list of 10 words
 			levelSelect = new LevelSelector(); //Create new joptionpane to select level
 			if(levelSelect.getLevel()!=0){ // only when a level is selected, that u start changing the window's content
-				languageSelect.setVisible(false);
-				addList.setVisible(false);
-				help.setVisible(false);
-				AudioPlayer.stopSound();
-				frame.getContentPane().remove(tabs);
-				controller.setVisible(true);				
-				if(!notFirstTime){
-					// clear the window
-					window.setText("");
-					notFirstTime = true;
-				}
-				// clear the window
-				window.setText("");
+				changeModes();
 				//Display new spelling message to GUI
 				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 				window.append(pColor,"                  Review Spelling Quiz ( Level "+ levelSelect.getLevel() +" )\n",18);
@@ -1033,5 +999,22 @@ public class SpellingAid extends JFrame implements ActionListener{
 			_videoReward.setText("Play video");
 		}
 	}
-
+	
+	// Method to change spelling modes
+	public void changeModes(){
+		languageSelect.setVisible(false);
+		addList.setVisible(false);
+		help.setVisible(false);
+		AudioPlayer.stopSound();
+		frame.getContentPane().remove(tabs);
+		controller.setVisible(true);
+		if(!notFirstTime){
+			// clear the window
+			window.setText("");
+			notFirstTime = true;
+		}
+		// clear the window
+		window.setText("");
+		
+	}
 }

@@ -375,7 +375,12 @@ public class SpellingList {
 			spellingAidApp.enter.setEnabled(true);
 			spellingAidApp.wordListen.setEnabled(true);
 			spellingAidApp.stopQuiz.setEnabled(true);
-			spellingAidApp.sentenceListen.setEnabled(true);
+			if (!spellingAidApp.reviewMode){
+				spellingAidApp.sentenceListen.setEnabled(true);
+			} else {
+				spellingAidApp.sentenceListen.setEnabled(false);
+				spellingAidApp.sentenceListen.setToolTipText("Example sentences are disabled in review mode.");
+			}
 		} else {
 			questionNo++;
 		}
