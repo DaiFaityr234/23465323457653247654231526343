@@ -1,4 +1,4 @@
-package spelling;
+package spelling.ContentPlayers;
 
 import java.io.File;
 
@@ -67,7 +67,7 @@ public class AudioPlayer {
 	static double getLength() {
 		return durationInSeconds;
 	}
-	static void stopSound() {
+	public static void stopSound() {
 		clip.stop(); //stop playing the looped clip
 		clip.close(); 
 		clip.drain();

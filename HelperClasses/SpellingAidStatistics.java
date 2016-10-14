@@ -1,4 +1,4 @@
-package spelling;
+package spelling.HelperClasses;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.swing.SwingWorker;
+
+import spelling.Functionality.SpellingAid;
 
 /**
  * 
@@ -30,7 +32,9 @@ public class SpellingAidStatistics extends SwingWorker<Void,String>{
 	File spelling_aid_tried_words;
 	File spelling_aid_statistics;
 	File spelling_aid_accuracy;
-
+	
+	// File for personal best
+	File personal_best;
 	// ArrayLists for storing file contents for easier processing later according to levels
 	HashMap<Integer, ArrayList<String>> mapOfTriedWords;	
 	ArrayList<String> wordStats;
@@ -50,6 +54,7 @@ public class SpellingAidStatistics extends SwingWorker<Void,String>{
 		spelling_aid_tried_words = new File(".spelling_aid_tried_words");
 		spelling_aid_statistics = new File(".spelling_aid_statistics");
 		spelling_aid_accuracy = new File(".spelling_aid_accuracy");
+		personal_best = new File(".personal_best");
 		wordStats = new ArrayList<String>();
 		mapOfTriedWords = new HashMap<Integer, ArrayList<String>>();
 		totalAsked = new HashMap<Integer,Integer>();
@@ -67,7 +72,14 @@ public class SpellingAidStatistics extends SwingWorker<Void,String>{
 				accuracyLine = readAccuracyList.readLine();
 			}
 			readAccuracyList.close();
-
+			
+			// PERSONAL BEST
+			BufferedReader readPB = new BufferedReader(new FileReader(personal_best));
+			String bestLine = readPB.readLine();
+			while(bestLine != null){
+				System.out.println(bestLine);
+			}
+			readPB.close();
 			// TRIED WORDS
 			BufferedReader readTriedList = new BufferedReader(new FileReader(spelling_aid_tried_words));
 			String triedWord = readTriedList.readLine();

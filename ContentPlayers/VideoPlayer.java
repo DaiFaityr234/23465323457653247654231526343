@@ -1,4 +1,4 @@
-package spelling;
+package spelling.ContentPlayers;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JWindow;
 import javax.swing.Timer;
 
+import spelling.Functionality.SpellingList;
 import uk.co.caprica.vlcj.component.EmbeddedMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
 
@@ -24,14 +25,14 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
  *
  */
 @SuppressWarnings("serial")
-public class MediaPlayer extends JWindow{
+public class VideoPlayer extends JWindow{
 	//Main embedded vlc player
 	private final EmbeddedMediaPlayerComponent mediaPlayerComponent = new EmbeddedMediaPlayerComponent();
 	//Integer store to allow toggling of play/pause button
 	public int pp = 0;
 
 	//Main constructor of MediaPlayer
-	public MediaPlayer(int i) {
+	public VideoPlayer(int i) {
 		final JWindow frame = new JWindow();
 		
 		frame.setAlwaysOnTop(true);

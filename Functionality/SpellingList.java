@@ -1,4 +1,4 @@
-package spelling;
+package spelling.Functionality;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -10,6 +10,10 @@ import java.util.HashMap;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
+
+import spelling.ContentPlayers.AudioPlayer;
+import spelling.HelperClasses.ClearStatistics;
+import spelling.HelperClasses.Tools;
 
 /**
  * 
@@ -56,9 +60,9 @@ public class SpellingList {
 	private int correctAnsCount = 0;
 
 	// List to store level labels
-	static ArrayList<String> levelNames = new ArrayList<String>();
+	public static ArrayList<String> levelNames = new ArrayList<String>();
 	// List to store special levels
-	static ArrayList<String> specialNames = new ArrayList<String>();
+	public static ArrayList<String> specialNames = new ArrayList<String>();
 	// List to ask questions from 
 	ArrayList<String> currentQuizList ;
 	// List of examples to words
@@ -75,6 +79,7 @@ public class SpellingList {
 	File spelling_aid_failed;
 	File spelling_aid_statistics;
 	File spelling_aid_accuracy;
+	File personal_best;
 	File check;
 	File examples;
 	// ArrayLists for storing file contents for easier processing later according to levels
@@ -110,7 +115,7 @@ public class SpellingList {
 		spelling_aid_failed = new File(".spelling_aid_failed");
 		spelling_aid_statistics = new File(".spelling_aid_statistics");
 		spelling_aid_accuracy = new File(".spelling_aid_accuracy");
-
+		personal_best = new File(".personal_best");
 		// INITIALISING LISTS TO STORE VALUES
 		initialiseListsToStoreValuesFromWordAndStatsList();
 	}
@@ -422,6 +427,8 @@ public class SpellingList {
 					spellingAidApp.score = spellingAidApp.score + 100;
 					if (spellingAidApp.score > spellingAidApp.highScore){
 						spellingAidApp.highScore = spellingAidApp.score;
+						Tools.overwrite(personal_best, new Double(spellingAidApp.highScore).toString());
+						System.out.println(new Double(spellingAidApp.highScore).toString());
 					}
 					spellingAidApp.scoreLabel.setText("Score: "+spellingAidApp.score);
 					spellingAidApp.personalBest.setText("Personal Best: "+spellingAidApp.highScore);

@@ -1,8 +1,9 @@
-package spelling;
+package spelling.HelperClasses;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+
 
 /**
  * 
@@ -14,8 +15,8 @@ import java.io.PrintWriter;
 public class ClearStatistics {
 
 	// function to return information message and at the same time clear all the statistic files
-	public static String clearStats(){
-		String infoMsg = "All Spelling Statistics Cleared";
+	public static String clearStats(String s){
+		String infoMsg = s;
 		clear();
 		return infoMsg;
 	}
@@ -26,6 +27,7 @@ public class ClearStatistics {
 		clearFile(new File(".spelling_aid_failed"));
 		clearFile(new File(".spelling_aid_statistics"));		
 		clearFile(new File(".spelling_aid_accuracy"));
+		clearFile(new File(".personal_best"));
 	}
 
 	// function to clear a single statistic file

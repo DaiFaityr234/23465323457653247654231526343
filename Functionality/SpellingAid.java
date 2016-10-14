@@ -1,4 +1,4 @@
-package spelling;
+package spelling.Functionality;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -43,9 +43,19 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
-import spelling.SpellingList.AnswerChecker;
-import spelling.SpellingList.QuestionAsker;
-import spelling.VoiceGenerator.Voice;
+import spelling.ContentPlayers.AudioPlayer;
+import spelling.ContentPlayers.SoundPlayer;
+import spelling.ContentPlayers.VideoCreator;
+import spelling.ContentPlayers.VideoPlayer;
+import spelling.ContentPlayers.VoiceGenerator;
+import spelling.ContentPlayers.VoiceGenerator.Voice;
+import spelling.Functionality.SpellingList.AnswerChecker;
+import spelling.Functionality.SpellingList.QuestionAsker;
+import spelling.HelperClasses.ClearStatistics;
+import spelling.HelperClasses.ColorPane;
+import spelling.HelperClasses.CustomSelector;
+import spelling.HelperClasses.LevelSelector;
+import spelling.HelperClasses.SpellingAidStatistics;
 
 /**
  * 
@@ -57,6 +67,17 @@ import spelling.VoiceGenerator.Voice;
  */
 @SuppressWarnings("serial")
 public class SpellingAid extends JFrame implements ActionListener{
+
+	//To determine whether to clear out welcome text, if true = don't clear
+	boolean notFirstTime; 
+
+	//Variables to store accuracy, current score, and high score
+	double currentAcc;
+	public double score = 0;
+
+	public double specialScore = 0;
+
+	public double highScore;
 
 	JFrame frame = new JFrame("Spelling Aid ~ VOXSPELL"); //Main spelling frame
 	final JPanel tabs = new JPanel(); //Main spelling option buttons
@@ -80,6 +101,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public JButton reviewMistakes = new JButton("Review Mistakes");
 	public JButton viewStats = new JButton("View Statistics");
 	public JButton clearStats = new JButton("Clear Statistics");
+	public int i; //Displays warning window
 
 	//Creating buttons for nextState components
 	public JButton _replayLevel = new JButton("Replay level");
@@ -94,7 +116,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public JTextField userInput = new JTextField();
 	public JButton enter = new JButton("Enter");
 	public JLabel scoreLabel = new JLabel ("Score: 0");
-	public JLabel personalBest = new JLabel ("Personal Best: 0");
+	public JLabel personalBest = new JLabel ("Personal Best: "+highScore);
 	public JButton sentenceListen = new JButton("Listen to a sentence");
 	public JButton wordListen = new JButton("Listen to the word again");
 	public JLabel voxPrompt = new JLabel("Voice Toggle");
@@ -109,9 +131,13 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public boolean reviewMode;
 	//Creating main GUI output area
 	public ColorPane window = new ColorPane();
+	public StyledDocument doc = (StyledDocument) window.getDocument();
+
+	public Style style = doc.addStyle("StyleName", null);
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JComboBox languageSelect = new JComboBox(new String[]{"English","Chinese","Japanese"});
 	public JButton addList = new JButton("Import extra spelling levels");
+	public JButton help = new JButton("Help");
 	public boolean foreign = false;
 	public JScrollPane scrollBar = new JScrollPane(window);
 	public LevelSelector levelSelect;
@@ -127,16 +153,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	//Layout for main GUI
 	FlowLayout options = new FlowLayout();
 
-	//To determine whether to clear out welcome text, if true = don't clear
-	boolean notFirstTime; 
-	
-	//Variables to store accuracy, current score, and high score
-	double currentAcc;
-	public double score = 0;
 
-	public double specialScore = 0;
-
-	public double highScore = 0;
 	//This Action object is created to be added as a listener for userInput
 	// so that when enter is pressed, it accepts input
 	Action enterAction = new AbstractAction()
@@ -252,7 +269,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		controller.add(userInput);
 
 
-		
+
 		enter.setPreferredSize(new Dimension(150, 30));
 		enter.setAlignmentX(Component.CENTER_ALIGNMENT);
 		enter.setForeground(qColor);
@@ -269,7 +286,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		progressBar.setForeground(pColor);
 		//Spacer to format components on right hand side of GUI
 		controller.add(Box.createRigidArea(new Dimension(40,50)));
-		
+
 		sentenceListen.setPreferredSize(new Dimension(150,40));
 		sentenceListen.setAlignmentX(Component.CENTER_ALIGNMENT);
 		sentenceListen.setForeground(qColor);
@@ -339,6 +356,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		voxSelect.addActionListener(this);
 		languageSelect.addActionListener(this);
 		addList.addActionListener(this);
+		help.addActionListener(this);
 		_replayLevel.addActionListener(this);
 		_nextLevel.addActionListener(this);
 		_videoReward.addActionListener(this);
@@ -372,13 +390,10 @@ public class SpellingAid extends JFrame implements ActionListener{
 		window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
 		window.append(pColor,"                                       Please select your language:\n\n",15);
 		window.append(pColor,"\n\n                                     Please select from one of the options above:\n\n\n",15);
-		window.append(tColor, "                                                    ", 16);
-	    StyledDocument doc = (StyledDocument) window.getDocument();
+		window.append(tColor, "                                                    ", 18);
 
-	    Style style = doc.addStyle("StyleName", null);
-	    StyleConstants.setIcon(style, new ImageIcon("400w.gif"));
-
-	    try {
+		StyleConstants.setIcon(style, new ImageIcon("400w.gif"));
+		try {
 			doc.insertString(doc.getLength(), "ignored text", style);
 		} catch (BadLocationException e1) {
 			e1.printStackTrace();
@@ -390,6 +405,9 @@ public class SpellingAid extends JFrame implements ActionListener{
 		addList.setSize(addList.getPreferredSize());
 		addList.setLocation(210, 120);
 		window.add(addList);
+		help.setSize(addList.getPreferredSize());
+		help.setLocation(210,180);
+		window.add(help);
 		//Disable any editing from user
 		window.setEditable(false);
 
@@ -460,9 +478,24 @@ public class SpellingAid extends JFrame implements ActionListener{
 			spellList = new SpellingList(); //Create new list of 10 words
 			LevelSelector levelSelect = new LevelSelector(); //Create new joptionpane to select level
 			if(levelSelect.getLevel()!=0 && levelSelect.getLevel()!=-1){ // only when a level is selected, that u start changing the window's content
+				File file = new File(".personal_best");
+				BufferedReader test;
+				try{
+					test = new BufferedReader(new FileReader(file));
+					String text = test.readLine();
+					if (text == null){
+						highScore = 0.0;
+					} else {
+						highScore = Double.parseDouble(text);
+						personalBest.setText("Personal Best: "+highScore);
+					}
+				} catch (IOException ex) {
+					ex.printStackTrace();
+				}
 				SpellingList.extraLevels = false;
 				languageSelect.setVisible(false);
 				addList.setVisible(false);
+				help.setVisible(false);
 				AudioPlayer.stopSound();
 				frame.getContentPane().remove(tabs);
 				progressBar.setVisible(true);
@@ -543,6 +576,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			if(levelSelect.getLevel()!=0){ // only when a level is selected, that u start changing the window's content
 				languageSelect.setVisible(false);
 				addList.setVisible(false);
+				help.setVisible(false);
 				AudioPlayer.stopSound();
 				frame.getContentPane().remove(tabs);
 				controller.setVisible(true);				
@@ -570,6 +604,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		else if (ae.getSource() == viewStats) {
 			languageSelect.setVisible(false);
 			addList.setVisible(false);
+			help.setVisible(false);
 			// Scroll bar set to an arbitrary value
 			window.setCaretPosition(1);
 			// Scroll bar set to the top
@@ -588,13 +623,20 @@ public class SpellingAid extends JFrame implements ActionListener{
 			statsWin.execute();
 		}
 		else if (ae.getSource() == clearStats) {
-			int i = JOptionPane.showConfirmDialog(this, "All spelling progress will be lost. Continue?");
+			if (languageSelect.getSelectedItem().toString().equals("English")){
+				i = JOptionPane.showConfirmDialog(this, "All spelling progress will be lost. Continue?");
+			} else if (languageSelect.getSelectedItem().toString().equals("Chinese")){				
+				i = JOptionPane.showConfirmDialog(this, "所有統計數據都將丟失。確認？");
+			} else if (languageSelect.getSelectedItem().toString().equals("Japanese")){	
+				i = JOptionPane.showConfirmDialog(this, "すべてのスペル進行状況が失われてしまいます。 続行しますか？");
+			}
 			if (i == JOptionPane.YES_OPTION){
 				score = 0.0;
 				highScore = 0.0;
 				specialScore = 0.0;
 				languageSelect.setVisible(false);
 				addList.setVisible(false);
+				help.setVisible(false);
 				// Scroll bar set to an arbitrary value
 				window.setCaretPosition(1);
 				// Scroll bar set to the top
@@ -603,8 +645,10 @@ public class SpellingAid extends JFrame implements ActionListener{
 				window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 				window.append(pColor,"                                              All Spelling Statistics Cleared \n",18);
 				window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
+				scoreLabel.setText("Score: "+score);
+				personalBest.setText("Personal Best: "+highScore);
 				//CLEAR STATS info dialog
-				JOptionPane.showMessageDialog(this, ClearStatistics.clearStats(), "VOXSPELL CLEAR STATS", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(this, ClearStatistics.clearStats("All Spelling Statistics Cleared"), "VOXSPELL CLEAR STATS", JOptionPane.INFORMATION_MESSAGE);
 			}
 
 		}
@@ -658,7 +702,8 @@ public class SpellingAid extends JFrame implements ActionListener{
 				_done.setText("Done");
 				spellPrompt.setText("Please spell here:");
 				enter.setText("Enter");
-
+				help.setText("Help");
+				sentenceListen.setText("Listen to a sentence");
 				wordListen.setText("Listen to the word again");
 				voxPrompt.setText("Voice Toggle");
 				stopQuiz.setText("Stop Quiz");
@@ -668,7 +713,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				reviewMistakes.setText("糾正錯字");
 				viewStats.setText("查看統計");
 				clearStats.setText("清除統計");
-				addList.setText("添加自定的拼字級");
+				addList.setText("添加自定的詞字表");
 				_replayLevel.setText("再試拼字級");
 				_nextLevel.setText("試下拼字級");
 				_videoReward.setText("視頻廣播");
@@ -676,7 +721,8 @@ public class SpellingAid extends JFrame implements ActionListener{
 				_done.setText("結束");
 				spellPrompt.setText("請下面拼寫:");
 				enter.setText("確認");
-
+				help.setText("說明");
+				sentenceListen.setText("聽聽一個例子");
 				wordListen.setText("再次聽聽字");
 				voxPrompt.setText("語音切換");
 				stopQuiz.setText("停止測驗");
@@ -694,7 +740,8 @@ public class SpellingAid extends JFrame implements ActionListener{
 				_done.setText("終了");
 				spellPrompt.setText("以下スペルください:");
 				enter.setText("確認");
-
+				help.setText("説明");
+				sentenceListen.setText("例を聞く");
 				wordListen.setText("再び言葉を聞く");
 				voxPrompt.setText("語調変更");
 				stopQuiz.setText("ストップ");
@@ -751,6 +798,32 @@ public class SpellingAid extends JFrame implements ActionListener{
 				}
 			}
 			if (val == JFileChooser.CANCEL_OPTION){
+			}
+		} else if (ae.getSource() == help){
+			if (languageSelect.getSelectedItem().toString().equals("English")){
+				JOptionPane.showMessageDialog(null, "Press \"New Spelling Quiz\" to start a new quiz.\n"
+						+ "Press \"Review Mistakes\" to review failed words in New Spelling Quiz.\n"
+						+ "Press \"View Statistics\" to view your statistics for a particular word list.\n"
+						+ "Press \"Clear Statistics\" to clear all current statistics on attempted words.\n"
+						+ "Press \"Import extra spelling levels\" to try spelling your own words.\n"
+						+ "You can change the language of certain buttons.\n"
+						+ "Press \"Help\" to find specific guidance on using this spelling aid in your native language.", "Help", JOptionPane.INFORMATION_MESSAGE);
+			} else if (languageSelect.getSelectedItem().toString().equals("Chinese")){				
+				JOptionPane.showMessageDialog(null, "請按 \"新拼字測驗\" 去開始拼寫英語單詞。\n"
+						+ "請按 \"糾正錯字\" 去復習拼錯的英語單詞。\n"
+						+ "請按 \"查看統計\" 去檢查拼寫英語單詞的進度。\n"
+						+ "請按 \"清除統計\" 去清除所有的統計數據。\n"
+						+ "請按 \"添加自定的詞字表\" 去拼寫你自己的英語單詞。\n"
+						+ "你可以改某些按鈕的標籤。\n"
+						+ "請按 \"說明\" 去看如何使用這個拼寫工具的指導。", "說明", JOptionPane.INFORMATION_MESSAGE);
+			} else if (languageSelect.getSelectedItem().toString().equals("Japanese")){	
+				JOptionPane.showMessageDialog(null, "新しいクイズを起動するために、\"新しいスペルクイズ\" を押してください。\n"
+						+ "間違った単語を改正するために、 \"ミスを直す\" を押してください。\n"
+						+ "英単語のスペルの進行状況を表示するために、 \"統計を分析\" を押してください。\n"
+						+ "すべてのデータを削除するために、\"統計を捨てる\" を押してください。\n"
+						+ "自分の言葉をスペル試してみるために、\"カスタムレベルを追加\" を押してください。\n"
+						+ "いくつかのボタンのラベルを変更することができます。\n"
+						+ "このアプリを使用する方法を見つけるために、\"説明\" を押してください。", "説明", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 		else if (ae.getSource() == stopQuiz) {
@@ -834,13 +907,13 @@ public class SpellingAid extends JFrame implements ActionListener{
 				new SoundPlayer();
 			} else {
 				AudioPlayer.stopSound();
-				new MediaPlayer(1);
+				new VideoPlayer(1);
 			}
 
 		}
 		else if (ae.getSource() == _specialVideoReward) {
 			AudioPlayer.stopSound();
-			new MediaPlayer(2);
+			new VideoPlayer(2);
 		}
 		else if (ae.getSource() == _done) {
 			revertToOriginal(); //Display main GUI again
@@ -850,7 +923,6 @@ public class SpellingAid extends JFrame implements ActionListener{
 			window.setCaretPosition(0);
 		}
 	}
-
 	// get the text from the text box then clears it
 	private String clearTxtBox(){
 		String theReturn = userInput.getText();
@@ -901,14 +973,13 @@ public class SpellingAid extends JFrame implements ActionListener{
 		window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
 		window.append(pColor,"                                       Please select your language:\n\n",15);
 		window.append(pColor,"\n\n                                     Please select from one of the options above:\n\n\n",15);
-		window.append(tColor, "                                                    ", 16);
-	    StyledDocument doc = (StyledDocument) window.getDocument();
-
-	    Style style = doc.addStyle("StyleName", null);
-	    StyleConstants.setIcon(style, new ImageIcon("400w.gif"));
+		window.append(tColor, "                                                      ", 16);
+		StyleConstants.setIcon(style, new ImageIcon("200.gif"));
 
 		languageSelect.setVisible(true);
 		addList.setVisible(true);
+		help.setVisible(true);
+
 	}
 
 	// Method that only sets end of quiz options at the bottom of the GUI to be visible
@@ -937,7 +1008,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		} 
 		nextState.setVisible(true);
 	}
-	
+
 	// Method to set colors of score and accuracy labels
 	// Green color for score means special audio reward can be played
 	public void setLabelColors(double acc, double sc, SpellingList sl) {

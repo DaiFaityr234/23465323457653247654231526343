@@ -1,4 +1,4 @@
-package spelling;
+package spelling.HelperClasses;
 
 /**
  * 
@@ -18,15 +18,15 @@ import javax.swing.text.StyledDocument;
 @SuppressWarnings("serial")
 public class ColorPane extends JTextPane {
 
-  public void append(Color c, String s, int size) { 
-	  
-	  StyledDocument doc = this.getStyledDocument();
-	  Style style = this.addStyle("adsf", null);
-	  StyleConstants.setFontSize(style, size);
-	  StyleConstants.setForeground(style, c);
-	  try { doc.insertString(doc.getLength(), s,style); }
-      catch (BadLocationException e){}
-    
-  }
+	public void append(Color c, String s, int size) { 
+
+		StyledDocument doc = this.getStyledDocument();
+		Style style = this.addStyle("adsf", null);
+		StyleConstants.setFontSize(style, size);
+		StyleConstants.setForeground(style, c);
+		try { doc.insertString(doc.getLength(), s,style); }
+		catch (BadLocationException e){}
+
+	}
 
 }

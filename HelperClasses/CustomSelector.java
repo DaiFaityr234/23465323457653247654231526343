@@ -1,4 +1,4 @@
-package spelling;
+package spelling.HelperClasses;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -11,6 +11,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import spelling.Functionality.SpellingList;
 
 /**
  * 

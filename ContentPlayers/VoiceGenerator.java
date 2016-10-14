@@ -1,9 +1,12 @@
-package spelling;
+package spelling.ContentPlayers;
 
 import java.io.File;
 import java.io.IOException;
 
 import javax.swing.SwingWorker;
+
+import spelling.HelperClasses.ClearStatistics;
+import spelling.HelperClasses.Tools;
 
 /**
  * 

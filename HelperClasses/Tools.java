@@ -1,4 +1,4 @@
-package spelling;
+package spelling.HelperClasses;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -26,6 +26,19 @@ public class Tools {
 			System.exit(0);
 		}
 	}
+	
+	// overwrite a string to a file
+	// record a word to a file
+		public static void overwrite(File file,String word){
+			try{
+				PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(file,false)));
+				writer.println(word);
+				writer.close();
+			} catch(IOException e){
+				System.out.println("An I/O Error Occurred");
+				System.exit(0);
+			}
+		}
 
 	// to run BASH commands
 	public static void processStarter(String command){

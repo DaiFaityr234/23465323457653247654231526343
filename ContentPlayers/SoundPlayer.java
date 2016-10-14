@@ -1,4 +1,4 @@
-package spelling;
+package spelling.ContentPlayers;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -96,6 +96,7 @@ public class SoundPlayer extends JFrame{
 		setSize(208,260);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.setLocationRelativeTo(null);
+		setResizable(false);
 		setVisible(true);
 		this.addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
