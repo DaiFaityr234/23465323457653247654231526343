@@ -488,8 +488,6 @@ public class SpellingAid extends JFrame implements ActionListener{
 				setLabelColors(currentAcc,score,spellList);
 				questionAsker = spellList.getQuestionAsker();
 				questionAsker.execute();
-				//spellingLvl=spellList.getQuestion(); // initiate swing worker
-				//spellingLvl.execute(); // execute quiz
 			} else if (levelSelect.getLevel()==-1 && SpellingList.extraLevels) {
 				if (CustomSelector.getExtra().equals("NULL")){
 					SpellingList.specialNames.clear();
@@ -537,9 +535,6 @@ public class SpellingAid extends JFrame implements ActionListener{
 				accuracyIndicator.setText("Level "+ spellList.getCurrentLevel());
 				questionAsker = spellList.getQuestionAsker();
 				questionAsker.execute();
-				//spellingLvl=spellList.getQuestion(); // initiate swing worker
-				//spellingLvl.execute(); // execute quiz
-
 			}
 		}
 		else if (ae.getSource() == viewStats) {
@@ -575,21 +570,16 @@ public class SpellingAid extends JFrame implements ActionListener{
 				score = 0.0;
 				highScore = 0.0;
 				specialScore = 0.0;
-				languageSelect.setVisible(false);
-				addList.setVisible(false);
-				help.setVisible(false);
-				// Scroll bar set to an arbitrary value
-				window.setCaretPosition(1);
-				// Scroll bar set to the top
-				window.setCaretPosition(0);
-				window.setText("");
-				window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
-				window.append(pColor,"                                              All Spelling Statistics Cleared \n",18);
-				window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 				scoreLabel.setText("Score: "+score);
 				personalBest.setText("Personal Best: "+highScore);
 				//CLEAR STATS info dialog
-				JOptionPane.showMessageDialog(this, ClearStatistics.clearStats("All Spelling Statistics Cleared"), "VOXSPELL CLEAR STATS", JOptionPane.INFORMATION_MESSAGE);
+				if (languageSelect.getSelectedItem().toString().equals("English")){
+					JOptionPane.showMessageDialog(this, ClearStatistics.clearStats("All Spelling Statistics Cleared"), "VOXSPELL CLEAR STATS", JOptionPane.INFORMATION_MESSAGE);
+				} else if (languageSelect.getSelectedItem().toString().equals("Chinese")){				
+					JOptionPane.showMessageDialog(this, ClearStatistics.clearStats("所有拼寫統計已清除"), "VOXSPELL CLEAR STATS", JOptionPane.INFORMATION_MESSAGE);
+				} else if (languageSelect.getSelectedItem().toString().equals("Japanese")){	
+					JOptionPane.showMessageDialog(this, ClearStatistics.clearStats("すべての統計情報をクリア"), "VOXSPELL CLEAR STATS", JOptionPane.INFORMATION_MESSAGE);
+				}
 			}
 
 		}
