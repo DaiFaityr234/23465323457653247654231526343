@@ -463,7 +463,7 @@ public class SpellingList {
 				attempt = true; // question has been attempted
 				endOfQuestion = true;
 				status = "ASKING";
-				spellingAidApp.specialScore = spellingAidApp.specialScore + 500;
+				spellingAidApp.specialScore = spellingAidApp.specialScore + 100;
 				if (spellingAidApp.specialScore > spellingAidApp.highScore){
 					spellingAidApp.highScore = spellingAidApp.specialScore;
 				}
