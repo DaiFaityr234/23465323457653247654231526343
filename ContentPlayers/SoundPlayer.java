@@ -24,14 +24,16 @@ public class SoundPlayer extends JFrame{
 	File soundFile;
 	long fileLength;
 	int frameSize;
+	int songLength;
 	float frameRate;
 	float duration;
 	long videoTime;
 	int value = 0;
 	boolean stopPlayback = false;
 	public JLabel label;
-	final JButton stopBtn = new JButton("Stop");
-	final JButton playBtn = new JButton("Play");
+	final JButton stopBtn = new JButton("STOP");
+	final JButton playBtn = new JButton("PLAY");
+	final JSlider bar = new JSlider(0,songLength,0);
 	JTextPane textPane;
 	
 	Timer timer;
@@ -47,6 +49,7 @@ public class SoundPlayer extends JFrame{
 			duration = (fileLength / (frameSize * frameRate));
 			DataLine.Info dataLineInfo = new DataLine.Info(SourceDataLine.class,audioFormat);
 			sourceDataLine = (SourceDataLine)AudioSystem.getLine(dataLineInfo);
+			songLength = (int)(sourceDataLine.getMicrosecondPosition()/1000);
 			new PlayThread().start();
 		}catch (Exception e) {
 			e.printStackTrace();
@@ -90,6 +93,7 @@ public class SoundPlayer extends JFrame{
 		contentPane.add(playBtn,"West");
 		contentPane.add(stopBtn,"East");
 		contentPane.add(textPane,"North");
+		//contentPane.add(bar,"South");
 		textPane.setEditable(false);
 		setTitle("Sound Player");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);

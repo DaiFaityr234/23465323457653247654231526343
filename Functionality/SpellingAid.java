@@ -22,7 +22,6 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
@@ -37,11 +36,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultCaret;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 
 import spelling.ContentPlayers.AudioPlayer;
 import spelling.ContentPlayers.SoundPlayer;
@@ -56,6 +51,7 @@ import spelling.HelperClasses.ColorPane;
 import spelling.HelperClasses.CustomSelector;
 import spelling.HelperClasses.LevelSelector;
 import spelling.HelperClasses.SpellingAidStatistics;
+import spelling.HelperClasses.StatisticsTable;
 
 /**
  * 
@@ -130,8 +126,6 @@ public class SpellingAid extends JFrame implements ActionListener{
 	//Creating main GUI output area
 	public ColorPane window = new ColorPane();
 	public JScrollPane scrollBar = new JScrollPane(window); //Adds scrolling pane to window
-	public StyledDocument doc = (StyledDocument) window.getDocument();
-	public Style style = doc.addStyle("StyleName", null); //Allows adding of image icon 
 
 	//Extra buttons for selecting a language, adding a list, and help 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -304,7 +298,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		//Scroll bar allows user to check previous words attempted during current session
 		pane.add(scrollBar, BorderLayout.CENTER);
 	}
-	
+
 	//Helper method to set parameters for JButtons
 	public void setButtonParameters(JButton button, Dimension d, Color fore, Color back){
 		button.setPreferredSize(d);
@@ -367,13 +361,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		window.append(pColor,"\n\n                                     Please select from one of the options above:\n\n\n",15);
 		window.append(tColor, "                                                    ", 18);
 
-		StyleConstants.setIcon(style, new ImageIcon("400w.gif"));
-		try {
-			doc.insertString(doc.getLength(), "ignored text", style);
-		} catch (BadLocationException e1) {
-			e1.printStackTrace();
-		}
-
+		window.addGIF("400w.gif");
 		languageSelect.setSize( languageSelect.getPreferredSize() );
 		languageSelect.setLocation(365, 83);
 		window.add( languageSelect );
@@ -538,25 +526,32 @@ public class SpellingAid extends JFrame implements ActionListener{
 			}
 		}
 		else if (ae.getSource() == viewStats) {
-			languageSelect.setVisible(false);
-			addList.setVisible(false);
-			help.setVisible(false);
-			// Scroll bar set to an arbitrary value
-			window.setCaretPosition(1);
-			// Scroll bar set to the top
-			window.setCaretPosition(0);
-			// clear the window
-			window.setText("");
-			//Display new spelling message to GUI
-			window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
-			window.append(pColor,"                                                      Spelling Aid Statistics \n",18);
-			window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
+			String[] modes = { "Normal", "Extra" };
+			String input = (String) JOptionPane.showInputDialog(null, "Choose Statistics",
+		        "The Choice of a Lifetime", JOptionPane.QUESTION_MESSAGE, null,modes,modes[0]); 
+		    if (input.equals("Normal")){
+				languageSelect.setVisible(false);
+				addList.setVisible(false);
+				help.setVisible(false);
+				// Scroll bar set to an arbitrary value
+				window.setCaretPosition(1);
+				// Scroll bar set to the top
+				window.setCaretPosition(0);
+				// clear the window
+				window.setText("");
+				//Display new spelling message to GUI
+				window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
+				window.append(pColor,"                                                      Spelling Aid Statistics \n",18);
+				window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 
-			notFirstTime = false; // to clear the stats
+				notFirstTime = false; // to clear the stats
 
-			// instantiate the statistics obj and execute it
-			SpellingAidStatistics statsWin = new SpellingAidStatistics(this);
-			statsWin.execute();
+				// instantiate the statistics obj and execute it
+				SpellingAidStatistics statsWin = new SpellingAidStatistics(this);
+				statsWin.execute();
+		    } else if (input.equals("Extra")){
+				new StatisticsTable(SpellingList.getSpecialList()).setVisible(true);
+		    }
 		}
 		else if (ae.getSource() == clearStats) {
 			if (languageSelect.getSelectedItem().toString().equals("English")){
@@ -875,8 +870,14 @@ public class SpellingAid extends JFrame implements ActionListener{
 		window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
 		window.append(pColor,"                                       Please select your language:\n\n",15);
 		window.append(pColor,"\n\n                                     Please select from one of the options above:\n\n\n",15);
-		window.append(tColor, "                                                      ", 16);
-		StyleConstants.setIcon(style, new ImageIcon("200.gif"));
+		if (!SpellingList.playingTrack7 && !SpellingList.playingTrack1 && !SpellingList.playingTrack2){
+			window.append(tColor, "                                                       ", 16);
+			window.addGIF("200.gif");
+		} else {
+			window.append(tColor, "                                                    ", 18);
+			window.addGIF("400w.gif");
+		}
+
 
 		languageSelect.setVisible(true);
 		addList.setVisible(true);

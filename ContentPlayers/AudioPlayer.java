@@ -39,7 +39,6 @@ public class AudioPlayer {
 			ex.printStackTrace();
 		}
 	}
-
 	public static void playSound(String file) {
 		try {
 			AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(file).getAbsoluteFile());

@@ -73,13 +73,6 @@ public class SpellingAidStatistics extends SwingWorker<Void,String>{
 			}
 			readAccuracyList.close();
 			
-			// PERSONAL BEST
-			BufferedReader readPB = new BufferedReader(new FileReader(personal_best));
-			String bestLine = readPB.readLine();
-			while(bestLine != null){
-				System.out.println(bestLine);
-			}
-			readPB.close();
 			// TRIED WORDS
 			BufferedReader readTriedList = new BufferedReader(new FileReader(spelling_aid_tried_words));
 			String triedWord = readTriedList.readLine();

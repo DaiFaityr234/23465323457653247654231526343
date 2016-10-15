@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
@@ -14,7 +15,8 @@ import javax.swing.SwingWorker;
 import spelling.ContentPlayers.AudioPlayer;
 import spelling.HelperClasses.ClearStatistics;
 import spelling.HelperClasses.Tools;
-
+import spelling.HelperClasses.Word;
+import spelling.HelperClasses.Word.StatisticsType;
 /**
  * 
  * This class controls the logic to ask questions 
@@ -63,6 +65,10 @@ public class SpellingList {
 	public static ArrayList<String> levelNames = new ArrayList<String>();
 	// List to store special levels
 	public static ArrayList<String> specialNames = new ArrayList<String>();
+	// Special List
+	static List<Word> specialList = new ArrayList<>();
+	// Special word
+	public Word w;
 	// List to ask questions from 
 	ArrayList<String> currentQuizList ;
 	// List of examples to words
@@ -387,8 +393,20 @@ public class SpellingList {
 
 	}
 
+	public static List<Word> getSpecialList() {
+		if (specialList.size() > 0){
+			return specialList;
+		}
+		else {
+			List<Word> List = new ArrayList<>();
+			List.add(new Word("NULL", 0,0,0));
+			return List;
+		}
+	}
+
 	// This method checks if the answer is right and act accordingly
 	private void checkAnswer(){
+
 		// ensure that the answer is valid
 		if (!validInput(userAnswer)){
 			// warning dialog for invalid user input
@@ -403,11 +421,15 @@ public class SpellingList {
 		// if it is valid, start the checking
 
 		// turn to lower case for BOTH and then compare
-		if(userAnswer.toLowerCase().equals(wordToSpell.toLowerCase())){
+		if(userAnswer.toLowerCase().trim().equals(wordToSpell.toLowerCase().trim())){
 			// Correct echoed if correct
 			if (duringq){
 				spellingAidApp.window.append(spellingAidApp.tColor,userAnswer,15);
 				spellingAidApp.window.append(spellingAidApp.tColor,"  ✔",15);
+				if (w != null){
+					w.setWordType(StatisticsType.FAULTED);
+					w.increaseStats(StatisticsType.FAULTED);
+				}
 				faulted = true;
 				spellingAidApp.window.append(spellingAidApp.tColor,"\n\n",15);
 			}
@@ -415,6 +437,10 @@ public class SpellingList {
 				spellingAidApp.window.append(spellingAidApp.hColor,userAnswer,15);
 				spellingAidApp.window.append(spellingAidApp.hColor,"  ✔",15);
 				faulted = false;
+				if (w != null){
+					w.setWordType(StatisticsType.MASTERED);
+					w.increaseStats(StatisticsType.MASTERED);
+				}
 				spellingAidApp.window.append(spellingAidApp.hColor,"\n\n",15);
 			}
 			spellingAidApp.voiceGen.sayText("Correct","");
@@ -443,6 +469,8 @@ public class SpellingList {
 					spellingAidApp.score = spellingAidApp.score + 50;
 					if (spellingAidApp.score > spellingAidApp.highScore){
 						spellingAidApp.highScore = spellingAidApp.score;
+						Tools.overwrite(personal_best, new Double(spellingAidApp.highScore).toString());
+						System.out.println(new Double(spellingAidApp.highScore).toString());
 					}
 					spellingAidApp.scoreLabel.setText("Score: "+spellingAidApp.score);
 					spellingAidApp.personalBest.setText("Personal Best: "+spellingAidApp.highScore);
@@ -460,15 +488,20 @@ public class SpellingList {
 				// answer is correct and so proceed to ASKING the next question
 				status = "ASKING";
 			} else {
+				w = new Word(wordToSpell);
+				specialList.add(w);
 				attempt = true; // question has been attempted
 				endOfQuestion = true;
 				status = "ASKING";
 				spellingAidApp.specialScore = spellingAidApp.specialScore + 100;
 				if (spellingAidApp.specialScore > spellingAidApp.highScore){
 					spellingAidApp.highScore = spellingAidApp.specialScore;
+					Tools.overwrite(personal_best, new Double(spellingAidApp.highScore).toString());
+					System.out.println(new Double(spellingAidApp.highScore).toString());
 				}
 				spellingAidApp.scoreLabel.setText("Special Score: "+spellingAidApp.specialScore);
 				spellingAidApp.personalBest.setText("Personal Best: "+spellingAidApp.highScore);
+				quizProgress = quizProgress + 10;
 				spellingAidApp.progressBar.setValue(quizProgress);
 			}
 
@@ -485,6 +518,10 @@ public class SpellingList {
 			} else {
 				spellingAidApp.window.append(spellingAidApp.qColor,userAnswer,15);
 				spellingAidApp.window.append(spellingAidApp.qColor,"  ✘",15);
+				if (w != null){
+					w.setWordType(StatisticsType.FAILED);
+					w.increaseStats(StatisticsType.FAILED);
+				}
 				spellingAidApp.voiceGen.sayText("Incorrect.",",");
 				AudioPlayer.playSound(".ON/Bit5.wav");
 				spellingAidApp.window.append(spellingAidApp.qColor,"\n\n",15);

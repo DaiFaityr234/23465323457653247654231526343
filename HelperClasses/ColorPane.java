@@ -3,12 +3,13 @@ package spelling.HelperClasses;
 /**
  * 
  * This class creates a custom JTextPane that easily appends
- * colored text to the main text area with text manipulation
+ * colored text and gifs to the main text area with text manipulation
  * @author hchu167
  *
  */
 import java.awt.Color;
 
+import javax.swing.ImageIcon;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
@@ -28,5 +29,14 @@ public class ColorPane extends JTextPane {
 		catch (BadLocationException e){}
 
 	}
-
+	public void addGIF(String pic){
+		StyledDocument doc = (StyledDocument) this.getDocument();
+		Style style = doc.addStyle("StyleName", null); //Allows adding of image icon 
+		StyleConstants.setIcon(style, new ImageIcon(pic));
+		try {
+			doc.insertString(doc.getLength(), "ignored text", style);
+		} catch (BadLocationException e1) {
+			e1.printStackTrace();
+		}
+	}
 }
