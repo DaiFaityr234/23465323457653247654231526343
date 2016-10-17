@@ -41,6 +41,7 @@ public class LevelSelector implements ActionListener{
 				JOptionPane.YES_OPTION, JOptionPane.PLAIN_MESSAGE, null, new String[]{} , null);
 		if (dialog == JOptionPane.CLOSED_OPTION){
 			SpellingList.levelNames.clear();
+			AudioPlayer.stopSound();
 		}
 	}
 

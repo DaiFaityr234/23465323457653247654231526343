@@ -94,6 +94,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public JButton newQuiz = new JButton("New Spelling Quiz");
 	public JButton reviewMistakes = new JButton("Review Mistakes");
 	public JButton viewStats = new JButton("View Statistics");
+	public JButton back = new JButton("Back");
 	public JButton clearStats = new JButton("Clear Statistics");
 	public int i; //Displays warning window
 
@@ -361,7 +362,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		window.append(pColor,"\n\n                                     Please select from one of the options above:\n\n\n",15);
 		window.append(tColor, "                                                    ", 18);
 
-		window.addGIF("400w.gif");
+		window.addGIF(".gif/400w.gif");
 		languageSelect.setSize( languageSelect.getPreferredSize() );
 		languageSelect.setLocation(365, 83);
 		window.add( languageSelect );
@@ -513,22 +514,28 @@ public class SpellingAid extends JFrame implements ActionListener{
 			spellList = new SpellingList(); //Create new list of 10 words
 			levelSelect = new LevelSelector(); //Create new joptionpane to select level
 			if(levelSelect.getLevel()!=0){ // only when a level is selected, that u start changing the window's content
-				changeModes();
-				//Display new spelling message to GUI
-				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
-				window.append(pColor,"                  Review Spelling Quiz ( Level "+ levelSelect.getLevel() +" )\n",18);
-				window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
 
 				spellList.createLevelList(levelSelect.getLevel(), "review",this);
-				accuracyIndicator.setText("Level "+ spellList.getCurrentLevel());
-				questionAsker = spellList.getQuestionAsker();
-				questionAsker.execute();
+				if (spellList.getNoOfQuestions() == 0){
+					JOptionPane.showMessageDialog(this, "Sorry, no words available.", "VOXSPELL REVIEW WORDS", JOptionPane.INFORMATION_MESSAGE);
+					revertToOriginal();
+				} else {
+					changeModes();
+					//Display new spelling message to GUI
+					window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
+					window.append(pColor,"                  Review Spelling Quiz ( Level "+ levelSelect.getLevel() +" )\n",18);
+					window.append(pColor,"+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
+
+					accuracyIndicator.setText("Level "+ spellList.getCurrentLevel());
+					questionAsker = spellList.getQuestionAsker();
+					questionAsker.execute();
+				}
 			}
 		}
 		else if (ae.getSource() == viewStats) {
 			String[] modes = { "Normal", "Extra" };
 			String input = (String) JOptionPane.showInputDialog(null, "Choose Statistics",
-		        "The Choice of a Lifetime", JOptionPane.QUESTION_MESSAGE, null,modes,modes[0]); 
+		        "Choose statistics mode", JOptionPane.QUESTION_MESSAGE, null,modes,modes[0]); 
 		    if (input.equals("Normal")){
 				languageSelect.setVisible(false);
 				addList.setVisible(false);
@@ -639,7 +646,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				reviewMistakes.setText("糾正錯字");
 				viewStats.setText("查看統計");
 				clearStats.setText("清除統計");
-				addList.setText("添加自定的詞字表");
+				addList.setText("輸入自定的詞字表");
 				_replayLevel.setText("再試拼字級");
 				_nextLevel.setText("試下拼字級");
 				_videoReward.setText("視頻廣播");
@@ -739,7 +746,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 						+ "請按 \"糾正錯字\" 去復習拼錯的英語單詞。\n"
 						+ "請按 \"查看統計\" 去檢查拼寫英語單詞的進度。\n"
 						+ "請按 \"清除統計\" 去清除所有的統計數據。\n"
-						+ "請按 \"添加自定的詞字表\" 去拼寫你自己的英語單詞。\n"
+						+ "請按 \"輸入自定的詞字表\" 去拼寫你自己的英語單詞。\n"
 						+ "你可以改某些按鈕的標籤。\n"
 						+ "請按 \"說明\" 去看如何使用這個拼寫工具的指導。", "說明", JOptionPane.INFORMATION_MESSAGE);
 			} else if (languageSelect.getSelectedItem().toString().equals("Japanese")){	
@@ -872,10 +879,10 @@ public class SpellingAid extends JFrame implements ActionListener{
 		window.append(pColor,"\n\n                                     Please select from one of the options above:\n\n\n",15);
 		if (!SpellingList.playingTrack7 && !SpellingList.playingTrack1 && !SpellingList.playingTrack2){
 			window.append(tColor, "                                                       ", 16);
-			window.addGIF("200.gif");
+			window.addGIF(".gif/200.gif");
 		} else {
 			window.append(tColor, "                                                    ", 18);
-			window.addGIF("400w.gif");
+			window.addGIF(".gif/400w.gif");
 		}
 
 
