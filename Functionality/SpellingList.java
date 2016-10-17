@@ -271,9 +271,7 @@ public class SpellingList {
 				spellingAidApp.revertToOriginal();
 			}
 			// stop the quiz and record progress when the whole quiz list has been covered
-			if(questionNo == 11){
-				AudioPlayer.stopSound();		
-			}
+			AudioPlayer.stopSound();
 			if(questionNo > getNoOfQuestions()){
 				recordFailedAndTriedWordsFromLevel();
 				if (correctAnsCount == 10){
@@ -404,9 +402,8 @@ public class SpellingList {
 			return specialList;
 		}
 		else {
-			List<Word> List = new ArrayList<>();
-			List.add(new Word("NULL", 0,0,0));
-			return List;
+			JOptionPane.showMessageDialog(null, "No extra statistics found", "VOXSPELL STATISTICS", JOptionPane.INFORMATION_MESSAGE);
+			return null;
 		}
 	}
 
@@ -430,28 +427,31 @@ public class SpellingList {
 		if(userAnswer.toLowerCase().trim().equals(wordToSpell.toLowerCase().trim())){
 			// Correct echoed if correct
 			if (duringq){
-				spellingAidApp.window.append(spellingAidApp.tColor,userAnswer,15);
-				spellingAidApp.window.append(spellingAidApp.tColor,"  ✔",15);
 				if (w != null){
 					w.setWordType(StatisticsType.FAULTED);
 					w.increaseStats(StatisticsType.FAULTED);
 					spellingAidApp.specialScore = spellingAidApp.specialScore + 50;
 					spellingAidApp.scoreLabel.setText("Special Score: "+spellingAidApp.specialScore);
 				}
+				spellingAidApp.window.append(spellingAidApp.tColor,userAnswer,15);
+				spellingAidApp.window.append(spellingAidApp.tColor,"  ✔",15);
+
 				faulted = true;
 				spellingAidApp.window.append(spellingAidApp.tColor,"\n\n",15);
 			}
 			else {
+				if (w != null){
+					w.setWordType(StatisticsType.MASTERED);
+					w.increaseStats(StatisticsType.MASTERED);
+					System.out.println("DONE");
+					spellingAidApp.specialScore = spellingAidApp.specialScore + 100;
+					spellingAidApp.scoreLabel.setText("Special Score: "+spellingAidApp.specialScore);
+				}
 				spellingAidApp.window.append(spellingAidApp.hColor,userAnswer,15);
 				spellingAidApp.window.append(spellingAidApp.hColor,"  ✔",15);
 				correctAnsCount++; //question answered correctly
 				faulted = false;
-				if (w != null){
-					w.setWordType(StatisticsType.MASTERED);
-					w.increaseStats(StatisticsType.MASTERED);
-					spellingAidApp.specialScore = spellingAidApp.specialScore + 100;
-					spellingAidApp.scoreLabel.setText("Special Score: "+spellingAidApp.specialScore);
-				}
+
 				spellingAidApp.window.append(spellingAidApp.hColor,"\n\n",15);
 			}
 			spellingAidApp.voiceGen.sayText("Correct","");
@@ -473,7 +473,6 @@ public class SpellingList {
 					if (spellingAidApp.score > spellingAidApp.highScore){
 						spellingAidApp.highScore = spellingAidApp.score;
 						Tools.overwrite(personal_best, new Double(spellingAidApp.highScore).toString());
-						System.out.println(new Double(spellingAidApp.highScore).toString());
 					}
 					spellingAidApp.scoreLabel.setText("Score: "+spellingAidApp.score);
 					spellingAidApp.personalBest.setText("Personal Best: "+spellingAidApp.highScore);
@@ -484,7 +483,6 @@ public class SpellingList {
 					if (spellingAidApp.score > spellingAidApp.highScore){
 						spellingAidApp.highScore = spellingAidApp.score;
 						Tools.overwrite(personal_best, new Double(spellingAidApp.highScore).toString());
-						System.out.println(new Double(spellingAidApp.highScore).toString());
 					}
 					spellingAidApp.scoreLabel.setText("Score: "+spellingAidApp.score);
 					spellingAidApp.personalBest.setText("Personal Best: "+spellingAidApp.highScore);
@@ -503,14 +501,15 @@ public class SpellingList {
 				status = "ASKING";
 			} else {
 				w = new Word(wordToSpell);
-				specialList.add(w);
+				if (!specialList.contains(w)){
+					specialList.add(w);
+				}
 				attempt = true; // question has been attempted
 				endOfQuestion = true;
 				status = "ASKING";
 				if (spellingAidApp.specialScore > spellingAidApp.highScore){
 					spellingAidApp.highScore = spellingAidApp.specialScore;
 					Tools.overwrite(personal_best, new Double(spellingAidApp.highScore).toString());
-					System.out.println(new Double(spellingAidApp.highScore).toString());
 				}
 				spellingAidApp.scoreLabel.setText("Special Score: "+spellingAidApp.specialScore);
 				spellingAidApp.personalBest.setText("Personal Best: "+spellingAidApp.highScore);
@@ -529,13 +528,10 @@ public class SpellingList {
 				status = "ANSWERING";
 				duringq = true;
 			} else {
-				spellingAidApp.window.append(spellingAidApp.qColor,userAnswer,15);
-				spellingAidApp.window.append(spellingAidApp.qColor,"  ✘",15);
 				if (w != null){
 					w.setWordType(StatisticsType.FAILED);
 					w.increaseStats(StatisticsType.FAILED);
 					spellingAidApp.specialScore = spellingAidApp.specialScore - 50;
-					System.out.println("asdf");
 				} else {
 					//processStarter("echo Incorrect | festival --tts");
 					Tools.record(spelling_aid_statistics,wordToSpell+" Failed"); // store as failed
@@ -545,6 +541,10 @@ public class SpellingList {
 						currentFailedList.add(wordToSpell);
 					}
 				}
+				spellingAidApp.window.append(spellingAidApp.qColor,userAnswer,15);
+				spellingAidApp.window.append(spellingAidApp.qColor,"  ✘  ",15);
+				spellingAidApp.window.append(spellingAidApp.tColor,wordToSpell,15);
+
 				spellingAidApp.voiceGen.sayText("Incorrect.",",");
 				AudioPlayer.playSound(".ON/Bit5.wav");
 				spellingAidApp.window.append(spellingAidApp.qColor,"\n\n",15);
