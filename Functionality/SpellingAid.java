@@ -818,7 +818,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			questionAsker.execute();
 		}
 		else if (ae.getSource() == _videoReward) {
-			if (_videoReward.getText().equals("Audio Reward")&&score >= 5000.0){
+			if (_videoReward.getText().equals("Audio Reward")&&score >= 1000.0){
 				AudioPlayer.stopSound();
 				new SoundPlayer();
 			} else {
@@ -939,10 +939,10 @@ public class SpellingAid extends JFrame implements ActionListener{
 		} else {
 			accuracyIndicator.setForeground(qColor);
 		}
-		if (sl.getCorrectAns() == 10 && sc>= 5000.0){
+		if (sl.getCorrectAns() == 10 && sc>= 1000.0){
 			scoreLabel.setForeground(hColor);
 			_videoReward.setText("Audio Reward");
-		} else if (sc>= 5000.0){
+		} else if (sc>= 1000.0){
 			scoreLabel.setForeground(hColor);
 			_videoReward.setText("Play video");
 		}else if (sc > 0.0){
