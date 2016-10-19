@@ -61,7 +61,7 @@ public class SoundPlayer extends JFrame{
 	    StyledDocument doc = (StyledDocument) textPane.getDocument();
 
 	    Style style = doc.addStyle("StyleName", null);
-	    StyleConstants.setIcon(style, new ImageIcon("200w.gif"));
+	    StyleConstants.setIcon(style, new ImageIcon(".gif/200w.gif"));
 
 	    try {
 			doc.insertString(doc.getLength(), "ignored text", style);

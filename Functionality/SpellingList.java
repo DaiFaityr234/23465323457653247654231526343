@@ -45,6 +45,7 @@ public class SpellingList {
 	public boolean faulted; //keep track of when word is faulted
 	public static boolean playingTrack1;
 	public static boolean playingTrack2;
+	public static boolean playingTrack3;
 	public static boolean playingTrack7;
 	// Current word to spell
 	private String wordToSpell; 	 
@@ -278,14 +279,17 @@ public class SpellingList {
 					AudioPlayer.playLoopSound(".ON/Track2.wav",-2.5f);
 					playingTrack1 = false;
 					playingTrack2 = true;
+					playingTrack3 = false;
 					playingTrack7 = false;
 				} else if (correctAnsCount >= 7){
 					AudioPlayer.playLoopSound(".ON/Track1.wav",-12.5f);
 					playingTrack1 = true;
 					playingTrack2 = false;
+					playingTrack3 = false;
 					playingTrack7 = false;
 				} else {
-					AudioPlayer.playLoopSound(".ON/Track3.wav",-0.0f);
+					AudioPlayer.playLoopSound(".ON/Track3.wav",-12.5f);
+					playingTrack3 = true;
 					playingTrack7 = true;
 				}
 				if(spellType.equals("new")){
@@ -377,7 +381,7 @@ public class SpellingList {
 			// after ASKING, it is time for ANSWERING
 
 			spellingAidApp.window.append(spellingAidApp.pColor," Spell word " + questionNo + " of " + currentQuizList.size() + ": ",15);
-			spellingAidApp.voiceGen.sayText("Please spell word " + questionNo + " of " + currentQuizList.size() + ": " + ",",wordToSpell+",");
+			spellingAidApp.voiceGen.sayText("Please spell word " + questionNo +",",wordToSpell+",");
 			status = "ANSWERING";
 			spellingAidApp.enter.setEnabled(true);
 			spellingAidApp.wordListen.setEnabled(true);

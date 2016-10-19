@@ -430,6 +430,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		//Setting internal representation for each option chosen
 		if (ae.getSource() == newQuiz) {
 			SpellingList.playingTrack2 = false;
+			SpellingList.playingTrack3 = false;
 			reviewMode = false;
 			quizInterrupted = false;
 			if (!foreign){
@@ -777,6 +778,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		}
 		else if (ae.getSource() == _replayLevel) {
 			SpellingList.playingTrack2 = false;
+			SpellingList.playingTrack3 = false;
 			AudioPlayer.stopSound();
 			continueQuiz();
 			//Display new spelling message to GUI
@@ -787,6 +789,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			if (SpellingList.playingTrack7){
 				AudioPlayer.playLoopSound(".ON/Track7.wav",-15.0f);
 			}
+			SpellingList.playingTrack7 = false;
 			//Start asking questions
 			spellList.createLevelList(spellList.getCurrentLevel(), "new",this);
 			accuracyIndicator.setText("Level "+ spellList.getCurrentLevel()+" Accuracy: "+spellList.getLvlAccuracy()+"%");
@@ -797,6 +800,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		}
 		else if (ae.getSource() == _nextLevel) {
 			SpellingList.playingTrack2 = false;
+			SpellingList.playingTrack3 = false;
 			AudioPlayer.stopSound();
 			continueQuiz();
 			int nextLevel = spellList.getCurrentLevel()+1;
@@ -809,6 +813,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 			if (SpellingList.playingTrack7){
 				AudioPlayer.playLoopSound(".ON/Track7.wav",-15.0f);
 			}
+			SpellingList.playingTrack7 = false;
 			//Start asking questions
 			spellList.createLevelList(nextLevel, "new",this);
 			accuracyIndicator.setText("Level "+ spellList.getCurrentLevel()+" Accuracy: "+spellList.getLvlAccuracy()+"%");
@@ -886,7 +891,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\n",18);
 		window.append(pColor,"                                       Please select your language:\n\n",15);
 		window.append(pColor,"\n\n                                     Please select from one of the options above:\n\n\n",15);
-		if (!SpellingList.playingTrack7 && !SpellingList.playingTrack1 && !SpellingList.playingTrack2){
+		if (SpellingList.playingTrack3){
 			window.append(tColor, "                                                       ", 16);
 			window.addGIF(".gif/200.gif");
 		} else {
@@ -956,10 +961,11 @@ public class SpellingAid extends JFrame implements ActionListener{
 
 	// Method to change spelling modes
 	public void changeModes(){
-		SpellingList.playingTrack2 = false;
-		if (!SpellingList.playingTrack2){
+	
+		if (SpellingList.playingTrack2){
 			AudioPlayer.stopSound();
 		}
+		SpellingList.playingTrack2 = false;
 		languageSelect.setVisible(false);
 		addList.setVisible(false);
 		help.setVisible(false);
@@ -977,10 +983,11 @@ public class SpellingAid extends JFrame implements ActionListener{
 
 	// Method to continue with spelling quiz at the end of a previous quiz
 	public void continueQuiz(){
-		SpellingList.playingTrack2 = false;
-		if (!SpellingList.playingTrack2){
+		
+		if (SpellingList.playingTrack2){
 			AudioPlayer.stopSound();
 		}
+		SpellingList.playingTrack2 = false;
 		reviewMode = false;
 		quizInterrupted = false;
 		stopQuiz.setText("Stop Quiz");
