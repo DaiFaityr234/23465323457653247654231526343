@@ -768,7 +768,8 @@ public class SpellingAid extends JFrame implements ActionListener{
 			if(spellList.status.equals("ANSWERING")){
 				stopQuiz.setEnabled(true);
 				quizInterrupted = true;
-				window.append(pColor,"\n\n Quiz has been cancelled. \n\n" ,18);
+				SpellingList.playingTrack3 = true;
+				AudioPlayer.playLoopSound(".ON/Track3.wav", -15.0f);
 				revertToOriginal();	
 				progressBar.setVisible(false);
 				spellList.recordFailedAndTriedWordsFromLevel();
