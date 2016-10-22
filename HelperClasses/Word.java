@@ -1,5 +1,12 @@
 package spelling.HelperClasses;
 
+/**
+ * 
+ * This class is used to represent the word 
+ * from a special word list
+ * @author hchu167
+ *
+ */
 public class Word implements Comparable<Word>{
 	private String spellWord;
 	private int masteredStat;

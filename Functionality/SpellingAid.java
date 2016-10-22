@@ -40,6 +40,7 @@ import javax.swing.text.DefaultCaret;
 
 import spelling.ContentPlayers.AudioPlayer;
 import spelling.ContentPlayers.SoundPlayer;
+import spelling.ContentPlayers.SpecialPlayer;
 import spelling.ContentPlayers.VideoCreator;
 import spelling.ContentPlayers.VideoPlayer;
 import spelling.ContentPlayers.VoiceGenerator;
@@ -826,7 +827,11 @@ public class SpellingAid extends JFrame implements ActionListener{
 		else if (ae.getSource() == _videoReward) {
 			if (_videoReward.getText().equals("Audio Reward")&&score >= 1000.0){
 				AudioPlayer.stopSound();
-				new SoundPlayer();
+				if (score >= 5000.0){
+					new SpecialPlayer();
+				} else {
+					new SoundPlayer();
+				}
 			} else {
 				AudioPlayer.stopSound();
 				new VideoPlayer(1);

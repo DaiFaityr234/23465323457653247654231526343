@@ -1,5 +1,12 @@
 package spelling.HelperClasses;
 
+/**
+ * 
+ * This class is used to represent the statistics
+ * table for the extra words
+ * @author hchu167
+ *
+ */
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.List;

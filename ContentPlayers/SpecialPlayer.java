@@ -3,7 +3,7 @@ package spelling.ContentPlayers;
 /**
  * 
  * This class creates an audio reward for 
- * users with a current score of 1000 and less than 5000.
+ * users with a current score of over 5000.
  * @author hchu167
  *
  */
@@ -23,7 +23,7 @@ import javax.imageio.ImageIO;
 import javax.sound.sampled.*;
 
 @SuppressWarnings("serial")
-public class SoundPlayer extends JFrame{
+public class SpecialPlayer extends JFrame{
 	JPanel contentPane;
 	AudioFormat audioFormat;
 	AudioInputStream audioInputStream;
@@ -46,7 +46,7 @@ public class SoundPlayer extends JFrame{
 	Timer timer;
 	private void playAudio() {
 		try{
-			soundFile =new File(".ON/TrackX.wav");
+			soundFile =new File(".ON/BACH.wav");
 			videoTime = soundFile.length();
 			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
 			audioFormat = audioInputStream.getFormat();
@@ -63,12 +63,15 @@ public class SoundPlayer extends JFrame{
 			System.exit(0);
 		}
 	} 
-	public SoundPlayer(){
+	public static void main (String [] args){
+		new SpecialPlayer();
+	}
+	public SpecialPlayer(){
 		textPane = new JTextPane();
 	    StyledDocument doc = (StyledDocument) textPane.getDocument();
 
 	    Style style = doc.addStyle("StyleName", null);
-	    StyleConstants.setIcon(style, new ImageIcon(".gif/200w.gif"));
+	    StyleConstants.setIcon(style, new ImageIcon(".gif/400.gif"));
 
 	    try {
 			doc.insertString(doc.getLength(), "ignored text", style);
@@ -102,9 +105,9 @@ public class SoundPlayer extends JFrame{
 		contentPane.add(textPane,"North");
 		//contentPane.add(bar,"South");
 		textPane.setEditable(false);
-		setTitle("Sound Player");
+		setTitle("Special Player");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(208,240);
+		setSize(185,265);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.setLocationRelativeTo(null);
 		setResizable(false);
@@ -155,3 +158,4 @@ public class SoundPlayer extends JFrame{
 
 
 }
+

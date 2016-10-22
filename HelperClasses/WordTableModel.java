@@ -1,5 +1,12 @@
 package spelling.HelperClasses;
 
+/**
+ * 
+ * This class is used to represent the model
+ * of the statistics table for special words
+ * @author hchu167
+ *
+ */
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
