@@ -2,8 +2,8 @@ package spelling.ContentPlayers;
 
 /**
  * 
- * This class creates an audio reward for 
- * users with a current score of 1000 and less than 5000.
+ * This class creates two separate audio rewards for 
+ * users with score of over 1000.
  * @author hchu167
  *
  */
@@ -24,6 +24,13 @@ import javax.sound.sampled.*;
 
 @SuppressWarnings("serial")
 public class SoundPlayer extends JFrame{
+	//Constructor parameters
+	public String musicTrack;
+	public String gif;
+	public int xSize;
+	public int ySize;
+	
+	//Fields used for audio clip
 	JPanel contentPane;
 	AudioFormat audioFormat;
 	AudioInputStream audioInputStream;
@@ -42,11 +49,10 @@ public class SoundPlayer extends JFrame{
 	final JButton playBtn = new JButton("PLAY");
 	final JSlider bar = new JSlider(0,songLength,0);
 	JTextPane textPane;
-	
 	Timer timer;
 	private void playAudio() {
 		try{
-			soundFile =new File(".ON/TrackX.wav");
+			soundFile =new File(this.musicTrack);
 			videoTime = soundFile.length();
 			audioInputStream = AudioSystem.getAudioInputStream(soundFile);
 			audioFormat = audioInputStream.getFormat();
@@ -63,12 +69,16 @@ public class SoundPlayer extends JFrame{
 			System.exit(0);
 		}
 	} 
-	public SoundPlayer(){
+	public SoundPlayer(String music, String gif, int x, int y){
+		this.musicTrack = music;
+		this.gif = gif;
+		this.xSize = x;
+		this.ySize = y;
 		textPane = new JTextPane();
 	    StyledDocument doc = (StyledDocument) textPane.getDocument();
 
 	    Style style = doc.addStyle("StyleName", null);
-	    StyleConstants.setIcon(style, new ImageIcon(".gif/200w.gif"));
+	    StyleConstants.setIcon(style, new ImageIcon(this.gif));
 
 	    try {
 			doc.insertString(doc.getLength(), "ignored text", style);
@@ -100,11 +110,10 @@ public class SoundPlayer extends JFrame{
 		contentPane.add(playBtn,"West");
 		contentPane.add(stopBtn,"East");
 		contentPane.add(textPane,"North");
-		//contentPane.add(bar,"South");
 		textPane.setEditable(false);
 		setTitle("Sound Player");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setSize(208,240);
+		setSize(this.xSize,this.ySize);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		this.setLocationRelativeTo(null);
 		setResizable(false);

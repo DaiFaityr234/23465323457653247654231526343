@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -17,6 +18,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -40,7 +43,6 @@ import javax.swing.text.DefaultCaret;
 
 import spelling.ContentPlayers.AudioPlayer;
 import spelling.ContentPlayers.SoundPlayer;
-import spelling.ContentPlayers.SpecialPlayer;
 import spelling.ContentPlayers.VideoCreator;
 import spelling.ContentPlayers.VideoPlayer;
 import spelling.ContentPlayers.VoiceGenerator;
@@ -97,6 +99,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 	public JButton viewStats = new JButton("View Statistics");
 	public JButton back = new JButton("Back");
 	public JButton clearStats = new JButton("Clear Statistics");
+	public JButton backToMainScreen = new JButton("BACK"); // button for view statistics
 	public int i; //Displays warning window
 
 	//Creating buttons for nextState components
@@ -230,9 +233,6 @@ public class SpellingAid extends JFrame implements ActionListener{
 		userInput.setSize(new Dimension(50, 15));
 		userInput.setAlignmentX(Component.CENTER_ALIGNMENT);
 		controller.add(userInput);
-
-
-
 		enter.setPreferredSize(new Dimension(150, 30));
 		enter.setAlignmentX(Component.CENTER_ALIGNMENT);
 		enter.setForeground(qColor);
@@ -288,8 +288,6 @@ public class SpellingAid extends JFrame implements ActionListener{
 		//Setting size for level indicator at the bottom of the GUI
 		accuracyIndicator.setPreferredSize(new Dimension(40, 30));
 		accuracyIndicator.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-
 		controller.add(accuracyIndicator);
 
 		//Arranging tabs only when GUI is opened for the first time
@@ -328,6 +326,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 		languageSelect.addActionListener(this);
 		addList.addActionListener(this);
 		help.addActionListener(this);
+		backToMainScreen.addActionListener(this);
 		_replayLevel.addActionListener(this);
 		_nextLevel.addActionListener(this);
 		_videoReward.addActionListener(this);
@@ -346,11 +345,22 @@ public class SpellingAid extends JFrame implements ActionListener{
 		frame.addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
 			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+				// Opens up a collection of soundtracks on the internet if there is internet connection
+				if (score >= 10000){
+					if(Desktop.isDesktopSupported()) { // Use default browser for computer
+						try {
+							Desktop.getDesktop().browse(new URI("https://soundcloud.com/justin-chuk-1"));
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (URISyntaxException e) {
+							e.printStackTrace();
+						}
+					}
+				}
 				File check = new File("wordList");
 				if (check.exists()){
 					check.delete(); // destroys user chosen wordList after GUI closes
 				}
-
 			}
 		});
 		// clear the window
@@ -404,7 +414,6 @@ public class SpellingAid extends JFrame implements ActionListener{
 
 	public static void main(String[] args) {
 		try {
-
 			// Preferred look and feel
 			UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
 			AudioPlayer.playLoopSound(".ON/Track1.wav",-12.5f);
@@ -417,7 +426,6 @@ public class SpellingAid extends JFrame implements ActionListener{
 		} catch (ClassNotFoundException ex) {
 			ex.printStackTrace();
 		}
-
 		javax.swing.SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				// Make main GUI
@@ -475,11 +483,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				}
 				SpellingList.playingTrack7 = false;
 				spellList.createLevelList(levelSelect.getLevel(), "new",this);
-				accuracyIndicator.setText("Level "+ spellList.getCurrentLevel()+" Accuracy: "+spellList.getLvlAccuracy()+"%");
-				currentAcc = spellList.getLvlAccuracy();
-				setLabelColors(currentAcc,score,spellList);
-				questionAsker = spellList.getQuestionAsker();
-				questionAsker.execute();
+				startQuestions();
 			} else if (levelSelect.getLevel()==-1 && SpellingList.extraLevels) {
 				AudioPlayer.stopSound();
 				if (CustomSelector.getExtra().equals("NULL")){
@@ -499,12 +503,10 @@ public class SpellingAid extends JFrame implements ActionListener{
 					questionAsker = spellList.getQuestionAsker();
 					questionAsker.execute();
 				}
-
 			} else {
 				SpellingList.specialNames.clear();
 			}
-		}
-		else if (ae.getSource() == reviewMistakes) {
+		} else if (ae.getSource() == reviewMistakes) {
 			AudioPlayer.stopSound();
 			reviewMode = true;
 			quizInterrupted = false;
@@ -518,7 +520,6 @@ public class SpellingAid extends JFrame implements ActionListener{
 			spellList = new SpellingList(); //Create new list of 10 words
 			levelSelect = new LevelSelector(); //Create new joptionpane to select level
 			if(levelSelect.getLevel()!=0){ // only when a level is selected, that u start changing the window's content
-
 				spellList.createLevelList(levelSelect.getLevel(), "review",this);
 				if (spellList.getNoOfQuestions() == 0){
 					JOptionPane.showMessageDialog(this, "Sorry, no words available.", "VOXSPELL REVIEW WORDS", JOptionPane.INFORMATION_MESSAGE);
@@ -535,12 +536,18 @@ public class SpellingAid extends JFrame implements ActionListener{
 					questionAsker.execute();
 				}
 			}
-		}
-		else if (ae.getSource() == viewStats) {
+		} else if (ae.getSource() == backToMainScreen) {
+			revertToOriginal();
+		} else if (ae.getSource() == viewStats) {
+			
 			String[] modes = { "Normal", "Extra" };
 			String input = (String) JOptionPane.showInputDialog(null, "Choose Statistics",
-		        "Choose statistics mode", JOptionPane.QUESTION_MESSAGE, null,modes,modes[0]); 
-		    if (input.equals("Normal")){
+					"Choose statistics mode", JOptionPane.QUESTION_MESSAGE, null,modes,modes[0]); 
+			if (input.equals("Normal")){
+				backToMainScreen.setSize(60,30);
+				backToMainScreen.setLocation(10,20);
+				window.add(backToMainScreen);
+				backToMainScreen.setVisible(true);
 				languageSelect.setVisible(false);
 				addList.setVisible(false);
 				help.setVisible(false);
@@ -554,17 +561,15 @@ public class SpellingAid extends JFrame implements ActionListener{
 				window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
 				window.append(pColor,"                                                      Spelling Aid Statistics \n",18);
 				window.append(pColor,"                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n",18);
-
 				notFirstTime = false; // to clear the stats
 
 				// instantiate the statistics obj and execute it
 				SpellingAidStatistics statsWin = new SpellingAidStatistics(this);
 				statsWin.execute();
-		    } else if (input.equals("Extra")){
+			} else if (input.equals("Extra")){
 				new StatisticsTable(SpellingList.getSpecialList()).setVisible(true);
-		    }
-		}
-		else if (ae.getSource() == clearStats) {
+			}
+		} else if (ae.getSource() == clearStats) { // Toggle message for different language users
 			if (languageSelect.getSelectedItem().toString().equals("English")){
 				i = JOptionPane.showConfirmDialog(this, "All spelling progress will be lost. Continue?");
 			} else if (languageSelect.getSelectedItem().toString().equals("Chinese")){				
@@ -587,14 +592,11 @@ public class SpellingAid extends JFrame implements ActionListener{
 					JOptionPane.showMessageDialog(this, ClearStatistics.clearStats("すべての統計情報をクリア"), "VOXSPELL CLEAR STATS", JOptionPane.INFORMATION_MESSAGE);
 				}
 			}
-
-		}
-		else if (ae.getSource() == enter) {
+		} else if (ae.getSource() == enter) {
 			if(spellList.status.equals("ANSWERING")){
 				takeInUserInput();
 			}
-		}
-		else if (ae.getSource() == sentenceListen){
+		} else if (ae.getSource() == sentenceListen){
 			// this button only works when the voice generator is not generating any voice
 			if(!spellList.status.equals("ASKING")&&respellGen.isDone()&&spellList.status.equals("ANSWERING")){
 				respellGen = new VoiceGenerator(theVoice,theVoiceStretch,theVoicePitch,theVoiceRange);
@@ -602,8 +604,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				respellGen.execute();
 				userInput.requestFocus();
 			}
-		}
-		else if (ae.getSource() == wordListen) {
+		} else if (ae.getSource() == wordListen) {
 			// this button only works when the voice generator is not generating any voice
 			if(!spellList.status.equals("ASKING")&&respellGen.isDone()&&spellList.status.equals("ANSWERING")){
 				respellGen = new VoiceGenerator(theVoice,theVoiceStretch,theVoicePitch,theVoiceRange);
@@ -611,8 +612,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				respellGen.execute();
 				userInput.requestFocus();
 			}
-		}
-		else if (ae.getSource() == voxSelect) {
+		} else if (ae.getSource() == voxSelect) {
 
 			// sets the chosen voice
 			if (voxSelect.getSelectedItem().toString().equals("Default")){
@@ -622,8 +622,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 				theVoice = Voice.AUCKLAND;
 			}
 			voiceGen.setVoice(theVoice);
-		}
-		else if (ae.getSource() == languageSelect) {
+		} else if (ae.getSource() == languageSelect) {
 			// sets the button language
 			if (languageSelect.getSelectedItem().toString().equals("English")){
 				foreign = false;
@@ -762,23 +761,21 @@ public class SpellingAid extends JFrame implements ActionListener{
 						+ "いくつかのボタンのラベルを変更することができます。\n"
 						+ "このアプリを使用する方法を見つけるために、\"説明\" を押してください。", "説明", JOptionPane.INFORMATION_MESSAGE);
 			}
-		}
-		else if (ae.getSource() == stopQuiz) {
+		} else if (ae.getSource() == stopQuiz) {
 			languageSelect.setVisible(false);
 			addList.setVisible(false);
 			if(spellList.status.equals("ANSWERING")){
 				stopQuiz.setEnabled(true);
 				quizInterrupted = true;
 				SpellingList.playingTrack3 = true;
-				AudioPlayer.playLoopSound(".ON/Track3.wav", -15.0f);
+				AudioPlayer.playLoopSound(".ON/Track3.wav", -7.5f);
 				revertToOriginal();	
 				progressBar.setVisible(false);
 				spellList.recordFailedAndTriedWordsFromLevel();
 			} else {
 				stopQuiz.setEnabled(false);
 			}
-		}
-		else if (ae.getSource() == _replayLevel) {
+		} else if (ae.getSource() == _replayLevel) {
 			SpellingList.playingTrack2 = false;
 			SpellingList.playingTrack3 = false;
 			AudioPlayer.stopSound();
@@ -794,13 +791,8 @@ public class SpellingAid extends JFrame implements ActionListener{
 			SpellingList.playingTrack7 = false;
 			//Start asking questions
 			spellList.createLevelList(spellList.getCurrentLevel(), "new",this);
-			accuracyIndicator.setText("Level "+ spellList.getCurrentLevel()+" Accuracy: "+spellList.getLvlAccuracy()+"%");
-			currentAcc = spellList.getLvlAccuracy();
-			setLabelColors(currentAcc,score,spellList);
-			questionAsker = spellList.getQuestionAsker();
-			questionAsker.execute();
-		}
-		else if (ae.getSource() == _nextLevel) {
+			startQuestions();
+		} else if (ae.getSource() == _nextLevel) {
 			SpellingList.playingTrack2 = false;
 			SpellingList.playingTrack3 = false;
 			AudioPlayer.stopSound();
@@ -818,31 +810,23 @@ public class SpellingAid extends JFrame implements ActionListener{
 			SpellingList.playingTrack7 = false;
 			//Start asking questions
 			spellList.createLevelList(nextLevel, "new",this);
-			accuracyIndicator.setText("Level "+ spellList.getCurrentLevel()+" Accuracy: "+spellList.getLvlAccuracy()+"%");
-			currentAcc = spellList.getLvlAccuracy();
-			setLabelColors(currentAcc,score,spellList);
-			questionAsker = spellList.getQuestionAsker();
-			questionAsker.execute();
-		}
-		else if (ae.getSource() == _videoReward) {
+			startQuestions();
+		} else if (ae.getSource() == _videoReward) {
 			if (_videoReward.getText().equals("Audio Reward")&&score >= 1000.0){
 				AudioPlayer.stopSound();
 				if (score >= 5000.0){
-					new SpecialPlayer();
+					new SoundPlayer(".ON/BACH.wav",".gif/400.gif",185,265);
 				} else {
-					new SoundPlayer();
+					new SoundPlayer(".ON/TrackX.wav",".gif/200w.gif",208,290);
 				}
 			} else {
 				AudioPlayer.stopSound();
 				new VideoPlayer(1);
 			}
-
-		}
-		else if (ae.getSource() == _specialVideoReward) {
+		} else if (ae.getSource() == _specialVideoReward) {
 			AudioPlayer.stopSound();
 			new VideoPlayer(2);
-		}
-		else if (ae.getSource() == _done) {
+		} else if (ae.getSource() == _done) {
 			revertToOriginal(); //Display main GUI again
 			// Scroll bar set to the top
 			window.setCaretPosition(1);
@@ -886,6 +870,7 @@ public class SpellingAid extends JFrame implements ActionListener{
 
 	// Method that only sets tabs at the top of the GUI to be visible
 	public void revertToOriginal() {
+		backToMainScreen.setVisible(false);
 		frame.getContentPane().add(tabs, BorderLayout.NORTH);
 		controller.setVisible(false);
 		nextState.setVisible(false);
@@ -904,12 +889,9 @@ public class SpellingAid extends JFrame implements ActionListener{
 			window.append(tColor, "                                                    ", 18);
 			window.addGIF(".gif/400w.gif");
 		}
-
-
 		languageSelect.setVisible(true);
 		addList.setVisible(true);
 		help.setVisible(true);
-
 	}
 
 	// Method that only sets end of quiz options at the bottom of the GUI to be visible
@@ -952,26 +934,42 @@ public class SpellingAid extends JFrame implements ActionListener{
 		}
 		if (sl.getCorrectAns() == 10 && sc>= 1000.0){
 			scoreLabel.setForeground(hColor);
-			_videoReward.setText("Audio Reward");
+			if (languageSelect.getSelectedItem().toString().equals("English")){
+				_videoReward.setText("Audio Reward");
+			} else if (languageSelect.getSelectedItem().toString().equals("Chinese")){				
+				_videoReward.setText("音樂曲目");
+			} else if (languageSelect.getSelectedItem().toString().equals("Japanese")){	
+				_videoReward.setText("音楽報酬");
+			}
 		} else if (sc>= 1000.0){
 			scoreLabel.setForeground(hColor);
-			_videoReward.setText("Play video");
-		}else if (sc > 0.0){
+			setPlayVideo();
+		} else if (sc > 0.0){
 			scoreLabel.setForeground(tColor);
-			_videoReward.setText("Play video");
+			setPlayVideo();
 		} else {
 			scoreLabel.setForeground(qColor);
-			_videoReward.setText("Play video");
+			setPlayVideo();
 		}
 	}
-
+	// Helper method of setLabelColors to set text of video reward for different languages
+	public void setPlayVideo(){
+		if (languageSelect.getSelectedItem().toString().equals("English")){
+			_videoReward.setText("Play video");
+		} else if (languageSelect.getSelectedItem().toString().equals("Chinese")){				
+			_videoReward.setText("播放視頻");
+		} else if (languageSelect.getSelectedItem().toString().equals("Japanese")){	
+			_videoReward.setText("動画を再生する");
+		}
+	}
 	// Method to change spelling modes
 	public void changeModes(){
-	
+		backToMainScreen.setVisible(false);
 		if (SpellingList.playingTrack2){
 			AudioPlayer.stopSound();
 		}
 		SpellingList.playingTrack2 = false;
+		backToMainScreen.setVisible(false);
 		languageSelect.setVisible(false);
 		addList.setVisible(false);
 		help.setVisible(false);
@@ -987,9 +985,18 @@ public class SpellingAid extends JFrame implements ActionListener{
 
 	}
 
+	// Method to start the swing worker for asking words
+
+	public void startQuestions() {
+		accuracyIndicator.setText("Level "+ spellList.getCurrentLevel()+" Accuracy: "+spellList.getLvlAccuracy()+"%");
+		currentAcc = spellList.getLvlAccuracy();
+		setLabelColors(currentAcc,score,spellList);
+		questionAsker = spellList.getQuestionAsker();
+		questionAsker.execute();
+	}
 	// Method to continue with spelling quiz at the end of a previous quiz
 	public void continueQuiz(){
-		
+
 		if (SpellingList.playingTrack2){
 			AudioPlayer.stopSound();
 		}

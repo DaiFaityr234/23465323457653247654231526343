@@ -28,7 +28,6 @@ public class AudioPlayer {
 
 			gainControl.setValue(volume); 
 
-
 			clip.loop(Clip.LOOP_CONTINUOUSLY);
 			clip.start();
 			if (!clip.isActive()){

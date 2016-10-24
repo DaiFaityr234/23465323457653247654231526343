@@ -42,6 +42,7 @@ public class LevelSelector implements ActionListener{
 		if (dialog == JOptionPane.CLOSED_OPTION){
 			SpellingList.levelNames.clear();
 			AudioPlayer.stopSound();
+			AudioPlayer.playLoopSound(".ON/Track1.wav", -12.5f);
 		}
 	}
 
